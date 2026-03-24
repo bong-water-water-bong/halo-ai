@@ -1,0 +1,13 @@
+use_default_settings: true
+server:
+  bind_address: "0.0.0.0"
+  port: 8888
+  secret_key: "REDACTED_SECRET_KEY"
+search:
+  autocomplete: "google"
+  default_lang: "en"
+  formats:
+    - html
+    - json
+general:
+  instance_name: "strix-halo search"
