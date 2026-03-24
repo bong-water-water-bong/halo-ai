@@ -317,7 +317,32 @@ Snapper manages automatic Btrfs snapshots on `/` and `/home`:
 | Yearly | 10 |
 | Pacman pre/post | Automatic (snap-pac) |
 
-## UpdatingAll updates are protected by automatic Btrfs snapshots with auto-rollback.That single command:1. **Snapshots** root + home before anything changes2. **Stops** all services cleanly3. **Updates** system packages + pulls all upstream repos4. **Rebuilds** only what changed5. **Starts** services and runs inference verification6. **Rolls back automatically** if anything fails7. **Snapshots** the good state after successIf any step fails, the entire system reverts to the pre-update snapshot instantly (Btrfs COW — no data copying, atomic rollback). The watchdog also snapshots before any auto-repair.
+## Updating
+
+All updates are protected by automatic Btrfs snapshots with auto-rollback.
+
+```bash
+/srv/ai/scripts/halo-update.sh update
+```
+
+That single command:
+
+1. **Snapshots** root + home before anything changes
+2. **Stops** all services cleanly
+3. **Updates** system packages + pulls all upstream repos
+4. **Rebuilds** only what changed
+5. **Starts** services and runs inference verification
+6. **Rolls back automatically** if anything fails
+7. **Snapshots** the good state after success
+
+If any step fails, the entire system reverts to the pre-update snapshot instantly. Btrfs COW means no data copying — rollback is atomic and immediate. The watchdog also snapshots before any auto-repair.
+
+```bash
+/srv/ai/scripts/halo-update.sh snapshot   # Manual snapshot
+/srv/ai/scripts/halo-update.sh status     # View update history
+/srv/ai/scripts/halo-update.sh rollback   # List rollback points
+```
+
 ## Credits & Acknowledgements
 
 halo-ai is built on the work of incredible open-source teams. This project would not exist without them.
