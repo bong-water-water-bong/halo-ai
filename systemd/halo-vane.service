@@ -8,6 +8,7 @@ User=<YOUR_USER>
 Group=<YOUR_USER>
 WorkingDirectory=/srv/ai/vane
 Environment=PORT=3001
+Environment=HOSTNAME=127.0.0.1
 Environment=SEARXNG_API_URL=http://localhost:8888
 ExecStart=/usr/local/bin/node /srv/ai/vane/.next/standalone/server.js
 Restart=on-failure
