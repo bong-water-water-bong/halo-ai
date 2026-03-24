@@ -26,7 +26,6 @@ Every other Strix Halo AI setup makes the same mistake: **containers on unified 
 
 | Project | Approach | GPU Memory Available | Performance |
 |---------|----------|---------------------|-------------|
-| [DreamServer](https://github.com/Light-Heart-Labs/DreamServer) | Docker Compose (13+ containers) | ~78-104 GB | 70-90% |
 | [amd-strix-halo-toolboxes](https://github.com/kyuz0/amd-strix-halo-toolboxes) | Docker/Distrobox images | ~78-104 GB | 70-90% |
 | [Framework llm-setup](https://github.com/Gygeek/Framework-strix-halo-llm-setup) | Shell scripts + Docker | Varies | ~85% |
 | [Lemonade (official)](https://github.com/lemonade-sdk/lemonade) | AppImage / source | Full | ~100% |
@@ -142,7 +141,7 @@ Clean uninstall of any service: `btrfs subvolume delete /srv/ai/<service>`
 ├── lemonade/         ← Lemonade 10.0.1 (lemonade-server + lemonade-router)
 ├── whisper-cpp/      ← whisper.cpp (ROCm accelerated)
 │
-├── open-webui/       ← Open WebUI (Python 3.13 venv)
+├── open-webui/       ← Open WebUI (Python 3.12 venv)
 ├── vane/             ← Vane/Perplexica (Node.js 24.5)
 ├── searxng/          ← SearXNG (Python 3.14 venv)
 ├── qdrant/           ← Qdrant 1.17.0 (Rust static binary)
@@ -166,7 +165,7 @@ Everything compiled from source:
 | Qdrant | 1.17.0 | Rust 1.94, cargo release |
 | Node.js | 24.5.0 | GCC 15.2, `--prefix=/usr/local` |
 | Python | 3.13.3 | GCC 15.2, `--enable-optimizations` |
-| Open WebUI | latest | pip (Python 3.13 venv) |
+| Open WebUI | 0.8.10 | pip (Python 3.12 venv) |
 | Vane | latest | Yarn 4.13 (Node.js 24.5) |
 | n8n | 2.14.0 | pnpm (Node.js 24.5) |
 | ComfyUI | latest | PyTorch 2.7.1+rocm6.2.4 |
@@ -193,7 +192,7 @@ Apache 2.0
 This project stands on the shoulders of incredible open-source work. Special thanks to:
 
 ### Core Inspiration
-- **[DreamServer](https://github.com/Light-Heart-Labs/DreamServer)** by Light-Heart-Labs — The original vision of a complete, integrated AI stack for Strix Halo. DreamServer's architecture of orchestrating 13+ services behind a unified interface was the direct inspiration for halo-ai. Their pioneering work proving that Strix Halo could run a full AI platform — not just a single model — showed what was possible. halo-ai takes that vision and rebuilds it bare-metal for maximum performance on unified memory hardware.
+- **[DreamServer](https://github.com/Light-Heart-Labs/DreamServer)** by Light-Heart-Labs — The original vision of a complete, integrated AI stack for Strix Halo. DreamServer's vision of a complete, integrated AI stack was the direct inspiration for halo-ai. Their pioneering work proving that Strix Halo could run a full AI platform — not just a single model — showed what was possible. halo-ai takes that vision and rebuilds it bare-metal for maximum performance on unified memory hardware.
 
 - **[Lemonade](https://github.com/lemonade-sdk/lemonade)** by AMD / Lemonade SDK — The unified AI serving layer that makes this entire stack practical. Lemonade's OpenAI + Ollama + Anthropic API compatibility means every frontend in this stack can talk to every backend through one interface. Their dedicated work on gfx1151 ROCm support, NPU+GPU hybrid inference, and the llamacpp-rocm nightly builds has been essential for making Strix Halo a viable AI platform. Without Lemonade, local AI on AMD hardware would still be a series of disconnected experiments.
 
