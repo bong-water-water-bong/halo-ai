@@ -1,0 +1,19 @@
+[Unit]
+Description=halo-ai Dashboard API (DreamServer fork)
+After=network.target
+
+[Service]
+Type=simple
+User=<YOUR_USER>
+Group=<YOUR_USER>
+WorkingDirectory=/srv/ai/dashboard-api
+Environment=SERVICE_HOST=127.0.0.1
+Environment=DASHBOARD_API_PORT=3002
+Environment=GPU_BACKEND=amd
+ExecStart=/srv/ai/dashboard-api/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 3002
+Restart=on-failure
+RestartSec=5
+SupplementaryGroups=video render
+
+[Install]
+WantedBy=multi-user.target

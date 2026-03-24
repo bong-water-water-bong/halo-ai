@@ -1,0 +1,15 @@
+[Unit]
+Description=halo-ai Dashboard UI (DreamServer fork)
+After=network.target halo-dashboard-api.service
+
+[Service]
+Type=simple
+User=<YOUR_USER>
+Group=<YOUR_USER>
+WorkingDirectory=/srv/ai/dashboard-ui
+ExecStart=/usr/local/bin/node node_modules/.bin/vite preview --host 127.0.0.1 --port 3003
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

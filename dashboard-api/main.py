@@ -1,0 +1,528 @@
+#!/usr/bin/env python3
+"""
+Dream Server Dashboard API
+Lightweight backend providing system status for the Dashboard UI.
+
+Default port: DASHBOARD_API_PORT (3002)
+
+Modules:
+  config.py       — Shared configuration and manifest loading
+  models.py       — Pydantic response schemas
+  security.py     — API key authentication
+  gpu.py          — GPU detection (NVIDIA + AMD)
+  helpers.py      — Service health, LLM metrics, system metrics
+  routers/        — Endpoint modules (workflows, features, setup, updates, agents, privacy)
+"""
+
+import asyncio
+import logging
+import os
+import socket
+import shutil
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
+
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+# --- Local modules ---
+from config import SERVICES, DATA_DIR, SIDEBAR_ICONS, MANIFEST_ERRORS
+from models import (
+    GPUInfo, ServiceStatus, DiskUsage, ModelInfo, BootstrapStatus,
+    FullStatus, PortCheckRequest,
+)
+from security import verify_api_key
+from gpu import get_gpu_info
+from helpers import (
+    get_all_services, get_cached_services, set_services_cache,
+    get_disk_usage, get_model_info, get_bootstrap_status,
+    get_uptime, get_cpu_metrics, get_ram_metrics,
+    get_llama_metrics, get_loaded_model, get_llama_context_size,
+)
+from agent_monitor import collect_metrics
+
+
+# ================================================================
+# TTL Cache — avoids redundant subprocess/IO calls every poll cycle
+# ================================================================
+
+class TTLCache:
+    """Simple in-memory cache with per-key TTL (seconds)."""
+
+    def __init__(self):
+        self._store: dict[str, tuple[float, object]] = {}
+
+    def get(self, key: str) -> object | None:
+        entry = self._store.get(key)
+        if entry is None:
+            return None
+        expires_at, value = entry
+        if time.monotonic() > expires_at:
+            del self._store[key]
+            return None
+        return value
+
+    def set(self, key: str, value: object, ttl: float):
+        self._store[key] = (time.monotonic() + ttl, value)
+
+
+_cache = TTLCache()
+
+# Cache TTLs (seconds)
+_GPU_CACHE_TTL = 3.0
+_STATUS_CACHE_TTL = 2.0
+_STORAGE_CACHE_TTL = 30.0
+_SERVICE_POLL_INTERVAL = 10.0  # background health check interval
+
+# --- Router imports ---
+from routers import workflows, features, setup, updates, agents, privacy
+
+logger = logging.getLogger(__name__)
+
+# --- App ---
+
+app = FastAPI(
+    title="Dream Server Dashboard API",
+    version="2.0.0",
+    description="System status API for Dream Server Dashboard"
+)
+
+# --- CORS ---
+
+def get_allowed_origins():
+    env_origins = os.environ.get("DASHBOARD_ALLOWED_ORIGINS", "")
+    if env_origins:
+        return env_origins.split(",")
+    origins = [
+        "http://localhost:3001", "http://127.0.0.1:3001",
+        "http://localhost:3000", "http://127.0.0.1:3000",
+    ]
+    try:
+        hostname = socket.gethostname()
+        local_ips = socket.gethostbyname_ex(hostname)[2]
+        for ip in local_ips:
+            if ip.startswith(("192.168.", "10.", "172.")):
+                origins.append(f"http://{ip}:3001")
+                origins.append(f"http://{ip}:3000")
+    except (OSError, socket.gaierror):
+        logger.debug("Could not detect LAN IPs for CORS origins")
+    return origins
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_allowed_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
+)
+
+# --- Include Routers ---
+
+app.include_router(workflows.router)
+app.include_router(features.router)
+app.include_router(setup.router)
+app.include_router(updates.router)
+app.include_router(agents.router)
+app.include_router(privacy.router)
+
+
+# ================================================================
+# Core Endpoints (health, status, preflight, services)
+# ================================================================
+
+@app.get("/health")
+async def health():
+    """API health check."""
+    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
+# --- Preflight ---
+
+@app.get("/api/preflight/docker", dependencies=[Depends(verify_api_key)])
+async def preflight_docker():
+    """Check if Docker is available."""
+    if os.path.exists("/.dockerenv"):
+        return {"available": True, "version": "available (host)"}
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "docker", "--version",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
+        if proc.returncode == 0:
+            parts = stdout.decode().strip().split()
+            version = parts[2].rstrip(",") if len(parts) > 2 else "unknown"
+            return {"available": True, "version": version}
+        return {"available": False, "error": "Docker command failed"}
+    except FileNotFoundError:
+        return {"available": False, "error": "Docker not installed"}
+    except asyncio.TimeoutError:
+        return {"available": False, "error": "Docker check timed out"}
+    except OSError:
+        logger.exception("Docker preflight check failed")
+        return {"available": False, "error": "Docker check failed"}
+
+
+@app.get("/api/preflight/gpu", dependencies=[Depends(verify_api_key)])
+async def preflight_gpu():
+    """Check GPU availability."""
+    gpu_info = await asyncio.to_thread(get_gpu_info)
+    if gpu_info:
+        vram_gb = round(gpu_info.memory_total_mb / 1024, 1)
+        result = {"available": True, "name": gpu_info.name, "vram": vram_gb, "backend": gpu_info.gpu_backend, "memory_type": gpu_info.memory_type}
+        if gpu_info.memory_type == "unified":
+            result["memory_label"] = f"{vram_gb} GB Unified"
+        return result
+
+    gpu_backend = os.environ.get("GPU_BACKEND", "").lower()
+    if gpu_backend == "amd":
+        return {"available": False, "error": "AMD GPU not detected via sysfs. Check /dev/kfd and /dev/dri access."}
+    return {"available": False, "error": "No GPU detected. Ensure NVIDIA drivers or AMD amdgpu driver is loaded."}
+
+
+@app.get("/api/preflight/required-ports")
+async def preflight_required_ports():
+    """Return the list of service ports for preflight checking (no auth required)."""
+    ports = []
+    for sid, cfg in SERVICES.items():
+        ext_port = cfg.get("external_port", cfg.get("port", 0))
+        if ext_port:
+            ports.append({"port": ext_port, "service": cfg.get("name", sid)})
+    return {"ports": ports}
+
+
+@app.post("/api/preflight/ports", dependencies=[Depends(verify_api_key)])
+async def preflight_ports(request: PortCheckRequest):
+    """Check if required ports are available."""
+    port_services = {}
+    for sid, cfg in SERVICES.items():
+        ext_port = cfg.get("external_port", cfg.get("port", 0))
+        if ext_port:
+            port_services[ext_port] = cfg.get("name", sid)
+
+    conflicts = []
+    for port in request.ports:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)
+                sock.bind(("0.0.0.0", port))
+        except socket.error:
+            conflicts.append({"port": port, "service": port_services.get(port, "Unknown"), "in_use": True})
+    return {"conflicts": conflicts, "available": len(conflicts) == 0}
+
+
+@app.get("/api/preflight/disk", dependencies=[Depends(verify_api_key)])
+async def preflight_disk():
+    """Check available disk space."""
+    try:
+        check_path = DATA_DIR if os.path.exists(DATA_DIR) else Path.home()
+        usage = shutil.disk_usage(check_path)
+        return {"free": usage.free, "total": usage.total, "used": usage.used, "path": str(check_path)}
+    except OSError:
+        logger.exception("Disk preflight check failed")
+        return {"error": "Disk check failed", "free": 0, "total": 0, "used": 0, "path": ""}
+
+
+# --- Core Data ---
+
+@app.get("/gpu", response_model=Optional[GPUInfo])
+async def gpu(api_key: str = Depends(verify_api_key)):
+    """Get GPU metrics (cached for a few seconds to avoid nvidia-smi spam)."""
+    cached = _cache.get("gpu_info")
+    if cached is not None:
+        if not cached:
+            raise HTTPException(status_code=503, detail="GPU not available")
+        return cached
+    info = await asyncio.to_thread(get_gpu_info)
+    _cache.set("gpu_info", info, _GPU_CACHE_TTL)
+    if not info:
+        raise HTTPException(status_code=503, detail="GPU not available")
+    return info
+
+
+@app.get("/services", response_model=list[ServiceStatus])
+async def services(api_key: str = Depends(verify_api_key)):
+    """Get all service health statuses (from background poll cache)."""
+    cached = get_cached_services()
+    if cached is not None:
+        return cached
+    return await get_all_services()
+
+
+@app.get("/disk", response_model=DiskUsage)
+async def disk(api_key: str = Depends(verify_api_key)):
+    return await asyncio.to_thread(get_disk_usage)
+
+
+@app.get("/model", response_model=Optional[ModelInfo])
+async def model(api_key: str = Depends(verify_api_key)):
+    return await asyncio.to_thread(get_model_info)
+
+
+@app.get("/bootstrap", response_model=BootstrapStatus)
+async def bootstrap(api_key: str = Depends(verify_api_key)):
+    return await asyncio.to_thread(get_bootstrap_status)
+
+
+@app.get("/status", response_model=FullStatus)
+async def status(api_key: str = Depends(verify_api_key)):
+    """Get full system status. Runs sync helpers in thread pool concurrently."""
+    service_statuses, gpu_info, disk_info, model_info, bootstrap_info, uptime = await asyncio.gather(
+        _get_services(),
+        asyncio.to_thread(get_gpu_info),
+        asyncio.to_thread(get_disk_usage),
+        asyncio.to_thread(get_model_info),
+        asyncio.to_thread(get_bootstrap_status),
+        asyncio.to_thread(get_uptime),
+    )
+    return FullStatus(
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        gpu=gpu_info, services=service_statuses,
+        disk=disk_info, model=model_info,
+        bootstrap=bootstrap_info, uptime_seconds=uptime
+    )
+
+
+@app.get("/api/status")
+async def api_status(api_key: str = Depends(verify_api_key)):
+    """Dashboard-compatible status endpoint.
+
+    Wrapped in a top-level try/except so that a transient failure in any
+    sub-call (GPU, health checks, llama metrics …) never returns a raw 500
+    to the dashboard — the frontend would flash "0/17" otherwise.
+    """
+    try:
+        return await _build_api_status()
+    except Exception:
+        logger.exception("/api/status handler failed — returning safe fallback")
+        return {
+            "gpu": None, "services": [], "model": None,
+            "bootstrap": None, "uptime": 0,
+            "version": app.version, "tier": "Unknown",
+            "cpu": {"percent": 0, "temp_c": None},
+            "ram": {"used_gb": 0, "total_gb": 0, "percent": 0},
+            "inference": {"tokensPerSecond": 0, "lifetimeTokens": 0,
+                          "loadedModel": None, "contextSize": None},
+            "manifest_errors": MANIFEST_ERRORS,
+        }
+
+
+async def _build_api_status() -> dict:
+    """Build the full status payload.
+
+    Runs ALL sync helpers (GPU, disk, CPU, RAM, model, bootstrap)
+    concurrently in the thread pool while async health checks and
+    llama-server queries run on the event loop — no serial blocking.
+    """
+    # Fan out: sync helpers in threads + async health checks simultaneously
+    (
+        gpu_info, model_info, bootstrap_info, uptime,
+        cpu_metrics, ram_metrics,
+        service_statuses, loaded_model,
+    ) = await asyncio.gather(
+        asyncio.to_thread(get_gpu_info),
+        asyncio.to_thread(get_model_info),
+        asyncio.to_thread(get_bootstrap_status),
+        asyncio.to_thread(get_uptime),
+        asyncio.to_thread(get_cpu_metrics),
+        asyncio.to_thread(get_ram_metrics),
+        _get_services(),
+        get_loaded_model(),
+    )
+
+    # Second fan-out: llama metrics + context size (need loaded_model)
+    llama_metrics_data, context_size = await asyncio.gather(
+        get_llama_metrics(model_hint=loaded_model),
+        get_llama_context_size(model_hint=loaded_model),
+    )
+
+    gpu_data = None
+    if gpu_info:
+        gpu_data = {
+            "name": gpu_info.name,
+            "vramUsed": round(gpu_info.memory_used_mb / 1024, 1),
+            "vramTotal": round(gpu_info.memory_total_mb / 1024, 1),
+            "utilization": gpu_info.utilization_percent,
+            "temperature": gpu_info.temperature_c,
+            "memoryType": gpu_info.memory_type,
+            "backend": gpu_info.gpu_backend,
+        }
+        if gpu_info.power_w is not None:
+            gpu_data["powerDraw"] = gpu_info.power_w
+        gpu_data["memoryLabel"] = "VRAM Partition" if gpu_info.memory_type == "unified" else "VRAM"
+
+    services_data = [{"name": s.name, "status": s.status, "port": s.external_port, "uptime": None} for s in service_statuses]
+
+    model_data = None
+    if model_info:
+        model_data = {"name": model_info.name, "tokensPerSecond": None, "contextLength": model_info.context_length}
+
+    bootstrap_data = None
+    if bootstrap_info.active:
+        bootstrap_data = {
+            "active": True, "model": bootstrap_info.model_name or "Full Model",
+            "percent": bootstrap_info.percent or 0,
+            "bytesDownloaded": int((bootstrap_info.downloaded_gb or 0) * 1024**3),
+            "bytesTotal": int((bootstrap_info.total_gb or 0) * 1024**3),
+            "eta": bootstrap_info.eta_seconds, "speedMbps": bootstrap_info.speed_mbps
+        }
+
+    tier = "Unknown"
+    if gpu_info:
+        vram_gb = gpu_info.memory_total_mb / 1024
+        if gpu_info.memory_type == "unified" and gpu_info.gpu_backend == "amd":
+            tier = "Strix Halo 90+" if vram_gb >= 90 else "Strix Halo Compact"
+        elif vram_gb >= 80: tier = "Professional"
+        elif vram_gb >= 24: tier = "Prosumer"
+        elif vram_gb >= 16: tier = "Standard"
+        elif vram_gb >= 8: tier = "Entry"
+        else: tier = "Minimal"
+
+    result = {
+        "gpu": gpu_data, "services": services_data, "model": model_data,
+        "bootstrap": bootstrap_data, "uptime": uptime,
+        "version": app.version, "tier": tier,
+        "cpu": cpu_metrics, "ram": ram_metrics,
+        "inference": {
+            "tokensPerSecond": llama_metrics_data.get("tokens_per_second", 0),
+            "lifetimeTokens": llama_metrics_data.get("lifetime_tokens", 0),
+            "loadedModel": loaded_model or (model_data["name"] if model_data else None),
+            "contextSize": context_size or (model_data["contextLength"] if model_data else None),
+        },
+        "manifest_errors": MANIFEST_ERRORS,
+    }
+    return result
+
+
+# --- Settings ---
+
+@app.get("/api/service-tokens", dependencies=[Depends(verify_api_key)])
+async def service_tokens():
+    """Return connection tokens for services that need browser-side auth."""
+    def _read_tokens():
+        tokens = {}
+        oc_token = os.environ.get("OPENCLAW_TOKEN", "")
+        if not oc_token:
+            for path in [Path("/data/openclaw/home/gateway-token"), Path("/dream-server/.env")]:
+                try:
+                    if path.suffix == ".env":
+                        for line in path.read_text().splitlines():
+                            if line.startswith("OPENCLAW_TOKEN="):
+                                oc_token = line.split("=", 1)[1].strip()
+                                break
+                    else:
+                        oc_token = path.read_text().strip()
+                except (OSError, ValueError):
+                    continue
+                if oc_token:
+                    break
+        if oc_token:
+            tokens["openclaw"] = oc_token
+        return tokens
+
+    return await asyncio.to_thread(_read_tokens)
+
+
+@app.get("/api/external-links")
+async def get_external_links(api_key: str = Depends(verify_api_key)):
+    """Return sidebar-ready external links derived from service manifests."""
+    links = []
+    for sid, cfg in SERVICES.items():
+        ext_port = cfg.get("external_port", cfg.get("port", 0))
+        if not ext_port or sid == "dashboard-api":
+            continue
+        links.append({
+            "id": sid, "label": cfg.get("name", sid), "port": ext_port,
+            "ui_path": cfg.get("ui_path", "/"),
+            "icon": SIDEBAR_ICONS.get(sid, "ExternalLink"),
+            "healthNeedles": [sid, cfg.get("name", sid).lower()],
+        })
+    return links
+
+
+@app.get("/api/storage")
+async def api_storage(api_key: str = Depends(verify_api_key)):
+    """Get storage breakdown for Settings page (cached, runs in thread pool)."""
+    cached = _cache.get("storage")
+    if cached is not None:
+        return cached
+
+    def _compute_storage():
+        models_dir = Path(DATA_DIR) / "models"
+        vector_dir = Path(DATA_DIR) / "qdrant"
+        data_dir = Path(DATA_DIR)
+
+        def dir_size_gb(path: Path) -> float:
+            if not path.exists():
+                return 0.0
+            total = 0
+            try:
+                for f in path.rglob("*"):
+                    if f.is_file():
+                        try:
+                            total += f.stat().st_size
+                        except OSError:
+                            pass
+            except (PermissionError, OSError):
+                pass
+            return round(total / (1024**3), 2)
+
+        disk_info = get_disk_usage()
+        models_gb = dir_size_gb(models_dir)
+        vector_gb = dir_size_gb(vector_dir)
+        other_gb = dir_size_gb(data_dir) - models_gb - vector_gb
+        total_data_gb = models_gb + vector_gb + max(other_gb, 0)
+
+        return {
+            "models": {"formatted": f"{models_gb:.1f} GB", "gb": models_gb, "percent": round(models_gb / disk_info.total_gb * 100, 1) if disk_info.total_gb else 0},
+            "vector_db": {"formatted": f"{vector_gb:.1f} GB", "gb": vector_gb, "percent": round(vector_gb / disk_info.total_gb * 100, 1) if disk_info.total_gb else 0},
+            "total_data": {"formatted": f"{total_data_gb:.1f} GB", "gb": total_data_gb, "percent": round(total_data_gb / disk_info.total_gb * 100, 1) if disk_info.total_gb else 0},
+            "disk": {"used_gb": disk_info.used_gb, "total_gb": disk_info.total_gb, "percent": disk_info.percent}
+        }
+
+    result = await asyncio.to_thread(_compute_storage)
+    _cache.set("storage", result, _STORAGE_CACHE_TTL)
+    return result
+
+
+# --- Service Health Polling ---
+
+async def _get_services() -> list[ServiceStatus]:
+    """Return cached service health, falling back to live check."""
+    cached = get_cached_services()
+    if cached is not None:
+        return cached
+    return await get_all_services()
+
+
+async def _poll_service_health():
+    """Background task: poll all service health on a timer.
+
+    Results stored via set_services_cache(). API endpoints read
+    cached results instead of running live checks. The poll can
+    take as long as it needs — nobody waits for it.
+    """
+    await asyncio.sleep(2)  # let services start
+    while True:
+        try:
+            statuses = await get_all_services()
+            set_services_cache(statuses)
+        except Exception:
+            logger.exception("Service health poll failed")
+        await asyncio.sleep(_SERVICE_POLL_INTERVAL)
+
+
+# --- Startup ---
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background tasks."""
+    asyncio.create_task(collect_metrics())
+    asyncio.create_task(_poll_service_health())
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("DASHBOARD_API_PORT", "3002")))
