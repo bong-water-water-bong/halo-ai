@@ -263,6 +263,7 @@ step "Building Node.js 24 (~20 min)"
 if ! node --version 2>/dev/null | grep -q "v24"; then
     progress "Compiling from source — this takes a while..."
     cd /tmp
+    [ -d nodejs-src ] && rm -rf nodejs-src
     git clone --depth 1 --branch v24.5.0 https://github.com/nodejs/node.git nodejs-src
     cd nodejs-src
     /opt/python313/bin/python3.13 ./configure --prefix=/usr/local -q
