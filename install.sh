@@ -41,6 +41,12 @@ echo -e "${DIM}  Bare-metal AI stack for AMD Strix Halo${NC}"
 echo -e "${DIM}  github.com/bong-water-water-bong/halo-ai${NC}"
 echo ''
 
+INSTALL_START=$(date +%s)
+echo -e "${YELLOW}${BOLD}  Estimated total install time: 2-3 hours (compiling from source)${NC}"
+echo -e "${DIM}  Builds use all $(nproc) cores in parallel — your machine will be working hard.${NC}"
+echo -e "${DIM}  Everything is built natively for your hardware — no containers, no shortcuts.${NC}"
+echo ''
+
 # ── Preflight ──────────────────────────────────────
 step "Preflight checks"
 [ "$(id -u)" -eq 0 ] && fail "Do not run as root. Run as your normal user (with sudo access)."
@@ -216,11 +222,16 @@ git checkout -B main origin/main -- configs/ systemd/ scripts/ assets/ docs/ REA
 ok "halo-ai repo ready"
 
 # ── ROCm ───────────────────────────────────────────
-step "ROCm GPU runtime"
+step "ROCm GPU runtime (~10 min download, ~2 min extract)"
 if [ "${NEED_ROCM:-}" = "1" ]; then
+    if ! command -v wget >/dev/null; then
+        info "Installing wget..."
+        sudo pacman -S --noconfirm --needed wget
+    fi
     info "Downloading ROCm 7.13 for gfx1151..."
-    cd /srv/ai/rocm
-    wget -q --show-progress 'https://rocm.nightlies.amd.com/tarball/therock-dist-linux-gfx1151-7.13.0a20260323.tar.gz' -O therock.tar.gz
+    cd /srv/ai/rocm || { warn "ROCm directory missing — skipping"; NEED_ROCM=0; }
+    if [ "${NEED_ROCM:-}" = "1" ]; then
+    wget -q --show-progress 'https://rocm.nightlies.amd.com/tarball/therock-dist-linux-gfx1151-7.13.0a20260323.tar.gz' -O therock.tar.gz || { warn "ROCm download failed — skipping (install manually later)"; NEED_ROCM=0; }
     mkdir -p install && tar -xf therock.tar.gz -C install
     sudo ln -sfn /srv/ai/rocm/install /opt/rocm
     echo 'export ROCM_HOME=/opt/rocm
@@ -229,10 +240,13 @@ export LD_LIBRARY_PATH=/opt/rocm/lib:$LD_LIBRARY_PATH' | sudo tee /etc/profile.d
     source /etc/profile.d/rocm.sh
     ok "ROCm installed. Verifying GPU..."
     rocminfo | grep -q gfx1151 && ok "gfx1151 detected" || warn "GPU not detected — may need reboot"
+    fi
+else
+    ok "ROCm already installed"
 fi
 
 # ── Python 3.12 + 3.13 ────────────────────────────
-step "Building Python 3.12 + 3.13"
+step "Building Python 3.12 + 3.13 (~15 min each)"
 for VER in 3.12.13 3.13.3; do
     MAJOR=$(echo $VER | cut -d. -f1-2)
     PREFIX=/opt/python$(echo $MAJOR | tr -d .)
@@ -246,7 +260,7 @@ for VER in 3.12.13 3.13.3; do
 done
 
 # ── Node.js 24 ─────────────────────────────────────
-step "Building Node.js 24"
+step "Building Node.js 24 (~20 min)"
 if ! node --version 2>/dev/null | grep -q "v24"; then
     progress "Compiling from source — this takes a while..."
     cd /tmp
@@ -259,7 +273,7 @@ if ! node --version 2>/dev/null | grep -q "v24"; then
 fi
 
 # ── Rust ───────────────────────────────────────────
-step "Rust + Go toolchains"
+step "Rust + Go toolchains (~5 min)"
 if ! command -v cargo >/dev/null; then
     info "Installing Rust toolchain..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -275,7 +289,7 @@ fi
 export PATH=/usr/local/go/bin:~/go/bin:$PATH
 
 # ── Build everything ───────────────────────────────
-step "Building llama.cpp (HIP + Vulkan + OpenCL)"
+step "Building llama.cpp — HIP + Vulkan + OpenCL (~10 min)"
 source /etc/profile.d/rocm.sh 2>/dev/null || true
 export ROCBLAS_USE_HIPBLASLT=1
 
@@ -290,7 +304,7 @@ cmake -B build-opencl -DGGML_OPENCL=ON -DCMAKE_BUILD_TYPE=Release -G Ninja -Wno-
 cmake --build build-opencl -j$(nproc)
 ok "llama.cpp built (HIP + Vulkan + OpenCL)"
 
-step "Building Lemonade + Whisper"
+step "Building Lemonade + Whisper (~10 min)"
 info "Building Lemonade..."
 cd /srv/ai/lemonade
 [ -d .git ] || git clone https://github.com/lemonade-sdk/lemonade .
@@ -304,7 +318,7 @@ cmake -B build -DGGML_HIP=ON -DAMDGPU_TARGETS=gfx1151 -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ok "whisper.cpp built"
 
-step "Building Qdrant + Caddy"
+step "Building Qdrant + Caddy (~25 min — Rust compile)"
 info "Building Qdrant..."
 cd /srv/ai/qdrant
 source ~/.cargo/env
@@ -316,7 +330,7 @@ info "Building Caddy..."
 go install github.com/caddyserver/caddy/v2/cmd/caddy@latest
 ok "Caddy built"
 
-step "Installing SearXNG + Open WebUI"
+step "Installing SearXNG + Open WebUI (~10 min)"
 info "Installing SearXNG..."
 cd /srv/ai/searxng
 [ -d .git ] || git clone https://github.com/searxng/searxng .
@@ -335,7 +349,7 @@ pip install -q setuptools hatchling && pip install -q .
 deactivate
 ok "Open WebUI installed"
 
-step "Installing Vane + n8n + ComfyUI + Kokoro"
+step "Installing Vane + n8n + ComfyUI + Kokoro (~15 min)"
 info "Installing Vane (Perplexica)..."
 cd /srv/ai/vane
 [ -d .git ] || git clone https://github.com/ItzCrazyKns/Vane .
@@ -471,7 +485,9 @@ cat << 'DONE'
   ╚═══════════════════════════════════╝
 DONE
 echo -e "${NC}"
-echo -e "${GREEN}${BOLD}  Installation complete!${NC}"
+INSTALL_END=$(date +%s)
+INSTALL_MINS=$(( (INSTALL_END - INSTALL_START) / 60 ))
+echo -e "${GREEN}${BOLD}  Installation complete! (${INSTALL_MINS} minutes)${NC}"
 echo ''
 echo -e "  ${CYAN}Enabled services:${NC} ${SELECTED_SERVICES[*]}"
 echo ''
