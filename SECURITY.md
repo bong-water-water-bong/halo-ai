@@ -19,7 +19,7 @@ Add these tunnels to your SSH config. They activate automatically when you conne
 
 ```
 Host strix-halo
-    HostName 10.0.0.200
+    HostName <YOUR_SERVER_IP>
     User <YOUR_USER>
     IdentityFile ~/.ssh/id_ed25519
     IdentitiesOnly yes

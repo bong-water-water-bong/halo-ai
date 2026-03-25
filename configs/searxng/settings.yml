@@ -2,7 +2,7 @@ use_default_settings: true
 server:
   bind_address: "127.0.0.1"
   port: 8888
-  secret_key: "REDACTED_SECRET_KEY"
+  secret_key: "CHANGEME-generate-a-new-secret-key"
 search:
   autocomplete: "google"
   default_lang: "en"
