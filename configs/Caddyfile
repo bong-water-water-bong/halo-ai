@@ -6,9 +6,9 @@
     tls internal
 
     basicauth * {
-        # Default password: Caddy (change immediately after install!)
+        # Default login: caddy / caddy (change immediately after install!)
         # Generate new hash: caddy hash-password --plaintext 'newpassword'
-        admin $2a$14$hyBjre0RT3lbdTzAtACFRuhlYeFAx4xsxVsk0IR2RkDy3KVJIi2Nq
+        caddy $2a$14$GfQWB.bJ0SNHRWVhLTRmt.JRcmXzkmTzpnPzVPvFicuwYwUwDiupy
     }
 
     handle_path /chat/* {
