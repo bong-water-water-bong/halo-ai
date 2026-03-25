@@ -343,6 +343,30 @@ If any step fails, the entire system reverts to the pre-update snapshot instantl
 /srv/ai/scripts/halo-update.sh rollback   # List rollback points
 ```
 
+## VS Code / GitHub Copilot Integration
+
+halo-ai works as a **local GitHub Copilot backend** through the official [Lemonade VS Code extension](https://github.com/lemonade-sdk/lemonade-vscode). Your Copilot Chat runs entirely on your Strix Halo — private, offline, zero API costs.
+
+### Setup
+
+1. Install the extension in VS Code:
+   ```
+   ext install lemonade-sdk.lemonade-sdk
+   ```
+
+2. SSH tunnel is already configured — Lemonade is on `localhost:8080`
+
+3. In VS Code settings, set the Lemonade endpoint:
+   ```json
+   {
+     "lemonade.serverUrl": "http://localhost:8080/api/v1"
+   }
+   ```
+
+4. Open Copilot Chat in VS Code, select **Lemonade** as the model provider
+
+Your code conversations now run on your local Qwen3-30B at 89 tok/s instead of cloud APIs. Recommended: download a code-focused model like Qwen3-Coder-30B for best results.
+
 ## Credits & Acknowledgements
 
 ### DreamServer — The Project That Started It All
