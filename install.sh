@@ -29,12 +29,17 @@ clear
 echo ''
 echo -e "${CYAN}${BOLD}"
 cat << 'BANNER'
-    __  __      __           ___    ____
-   / / / /___ _/ /___       /   |  /  _/
-  / /_/ / __ `/ / __ \     / /| |  / /
- / __  / /_/ / / /_/ /    / ___ |_/ /
-/_/ /_/\__,_/_/\____/    /_/  |_/___/
-
+          .=============.
+         //  .: ✦ :.  \\
+        ||               ||
+         \\  ': ✦ :'  //
+          '============='
+              || ||
+         ╔════╧══╧════╗
+         ║  █▀█  ▀█▀  ║
+         ║  █▀█   █   ║
+         ║  █ █  ▄█▄  ║
+         ╚════════════╝
 BANNER
 echo -e "${NC}"
 echo -e "${DIM}  Bare-metal AI stack for AMD Strix Halo${NC}"
@@ -57,7 +62,7 @@ echo ''
 prompt() {
     local var_name="$1" prompt_text="$2" default="$3"
     read -rp "$(echo -e "${BLUE}[halo-ai]${NC}") $prompt_text [${default}]: " input
-    eval "$var_name=\"${input:-$default}\""
+    printf -v "$var_name" '%s' "${input:-$default}"
 }
 
 # Helper: prompt for password (no echo)
@@ -67,7 +72,7 @@ prompt_secret() {
         read -srp "$(echo -e "${BLUE}[halo-ai]${NC}") $prompt_text: " input
         echo ''
         if [ -n "$input" ]; then
-            eval "$var_name=\"$input\""
+            printf -v "$var_name" '%s' "$input"
             return
         fi
         warn "Password cannot be empty. Please try again."
@@ -368,8 +373,8 @@ ok "Kokoro installed"
 step "System hardening & configuration"
 
 # GPU device permissions
-echo 'SUBSYSTEM=="kfd", KERNEL=="kfd", TAG+="uaccess", GROUP="render", MODE="0666"
-SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", GROUP="render", MODE="0666"' | sudo tee /etc/udev/rules.d/70-amdgpu.rules
+echo 'SUBSYSTEM=="kfd", KERNEL=="kfd", TAG+="uaccess", GROUP="render", MODE="0660"
+SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", GROUP="render", MODE="0660"' | sudo tee /etc/udev/rules.d/70-amdgpu.rules
 
 # Kernel param for GPU memory
 ENTRY=$(ls /boot/loader/entries/*.conf | head -1)
@@ -442,12 +447,12 @@ echo ''
 echo ''
 echo -e "${GREEN}${BOLD}"
 cat << 'DONE'
-    ___           __        ____       __  __
-   /   |   ____  / /_      / __ \___  / /_/ /_  ___  _____
-  / /| |  / __ \/ __/     / / / / _ \/ __/ __ \/ _ \/ ___/
- / ___ | / / / / /_       / /_/ /  __/ /_/ / / /  __/ /
-/_/  |_|/_/ /_/\__/       \____/\___/\__/_/ /_/\___/_/
-
+         ╔════════════╗
+         ║  █▀█  ▀█▀  ║
+         ║  █▀█   █   ║
+         ║  █ █  ▄█▄  ║
+         ╚════════════╝
+      Installation Complete
 DONE
 echo -e "${NC}"
 echo -e "${GREEN}${BOLD}  Installation complete!${NC}"
