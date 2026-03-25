@@ -25,7 +25,7 @@ fail()  { echo -e "  ${RED} x${NC} $1"; exit 1; }
 progress() { echo -e "  ${DIM}    ... $1${NC}"; }
 
 # ── Banner ─────────────────────────────────────────
-clear
+clear 2>/dev/null || true
 echo ''
 echo -e "${CYAN}${BOLD}"
 cat << 'BANNER'
