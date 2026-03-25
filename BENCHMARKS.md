@@ -5,36 +5,37 @@
 **Kernel**: 6.19.9-arch1-1  
 **ROCm**: 7.13 (TheRock nightly, gfx1151)  
 **GPU Memory (GTT)**: 115 GB  
-**Backend**: llama.cpp HIP + rocWMMA Flash Attention  
 **Model**: Qwen3-30B-A3B (MoE, Q4_K_M, 18GB)
 
-## Inference Performance
+## Backend Comparison
 
-| Test | Prompt Tokens | Gen Tokens | Prompt Speed | Gen Speed | TTFT | Total |
-|------|:---:|:---:|:---:|:---:|:---:|:---:|
-| Short Q&A | 12 | 20 | 217 tok/s | 73.3 tok/s | 55ms | 0.33s |
-| Technical explanation | 13 | 200 | 222 tok/s | 70.2 tok/s | 59ms | 2.91s |
-| Long generation | 31 | 500 | 302 tok/s | 68.4 tok/s | 103ms | 7.42s |
-| Code generation | 16 | 300 | 257 tok/s | 69.0 tok/s | 62ms | 4.41s |
-| Reasoning (CoT) | 32 | 200 | 288 tok/s | 67.6 tok/s | 111ms | 3.07s |
+| Backend | Gen Speed (200 tok) | Gen Speed (500 tok) | Prompt Speed |
+|---------|:---:|:---:|:---:|
+| **Vulkan (RADV) + Flash Attention** | **85.1 tok/s** | **84.5 tok/s** | 58-172 tok/s |
+| HIP (ROCm) + rocWMMA FA | 70.2 tok/s | 68.4 tok/s | 217-302 tok/s |
 
-### Summary
+**Vulkan wins for generation** (~20% faster). HIP wins for prompt processing. Default backend is now Vulkan + Flash Attention.
 
-- **Generation**: 67-73 tok/s sustained (varies with reasoning complexity)
-- **Prompt processing**: 217-302 tok/s (scales with prompt length)
-- **Time to first token**: 55-111ms
-- **GPU utilization during inference**: 97%
-- **GPU temperature under sustained load**: 55°C (well within limits)
+## Inference Performance (Vulkan + FA, default)
+
+| Test | Prompt Tokens | Gen Tokens | Gen Speed | TTFT | Total |
+|------|:---:|:---:|:---:|:---:|:---:|
+| Short Q&A | 12 | 20 | 85+ tok/s | <60ms | 0.3s |
+| Technical explanation | 18 | 200 | 85.1 tok/s | 109ms | 2.5s |
+| Long generation | 20 | 500 | 84.5 tok/s | 99ms | 6.0s |
+
+### Key Metrics
+
+- **Generation**: ~85 tok/s sustained (Vulkan + Flash Attention)
+- **Time to first token**: <110ms
+- **GPU utilization**: 97% during inference
+- **GPU temperature**: 55°C under sustained load (well within limits)
 
 ### Why MoE Models Excel on Strix Halo
 
-Qwen3-30B-A3B is a Mixture of Experts model — 30B total parameters but only ~3B active per token. This is the ideal architecture for Strix Halo because:
+Qwen3-30B-A3B is a Mixture of Experts model — 30B total parameters but only ~3B active per token. This is ideal for Strix Halo because memory bandwidth (~215 GB/s) is the bottleneck, not compute. MoE activates fewer parameters per token = less data moved = faster generation.
 
-- **Memory bandwidth is the bottleneck**, not compute. Strix Halo's ~215 GB/s LPDDR5x bandwidth is shared between CPU and GPU.
-- **MoE activates fewer parameters per token**, meaning less data moved per inference step.
-- **The full 30B model fits in 18GB**, leaving 97GB free for larger models, longer contexts, or multiple models.
-
-Dense 70B models achieve ~15-20 tok/s on the same hardware — usable but significantly slower due to bandwidth saturation.
+Dense 70B models achieve ~15-20 tok/s on the same hardware — usable but significantly slower.
 
 ## GPU & Memory Profile
 
@@ -47,35 +48,28 @@ Dense 70B models achieve ~15-20 tok/s on the same hardware — usable but signif
 | GPU Temp (idle) | 26°C |
 | GPU Temp (sustained inference) | 55°C |
 | GPU Utilization (inference) | 97% |
-| GPU Power (inference) | ~4W (integrated, shared power) |
 
 ## Service Memory Footprint
 
-All 10 services running simultaneously:
+All services running simultaneously:
 
-| Service | Memory | Notes |
-|---------|--------|-------|
-| llama-server (Qwen3-30B) | 657 MB | + 18GB GPU for model weights |
-| Open WebUI | 3,238 MB | Includes embedding models |
-| Qdrant | 514 MB | Vector DB (grows with data) |
-| ComfyUI | 509 MB | PyTorch ROCm loaded |
-| n8n | 438 MB | Workflow engine |
-| DreamServer Dashboard | ~55 MB | UI + API |
-| SearXNG | 94 MB | Search proxy |
-| Vane (Perplexica) | 35 MB | Next.js server |
-| Lemonade | 20 MB | C++ router |
-| **Total service overhead** | **~5.6 GB** | |
+| Service | Memory |
+|---------|--------|
+| llama-server (Qwen3-30B) | 657 MB + 18GB GPU |
+| Open WebUI | 3,238 MB |
+| Qdrant | 514 MB |
+| ComfyUI | 509 MB |
+| n8n | 438 MB |
+| DreamServer Dashboard | ~55 MB |
+| SearXNG | 94 MB |
+| Vane (Perplexica) | 35 MB |
+| Lemonade | 20 MB |
+| **Total service overhead** | **~5.6 GB** |
 
-**System total**: 27 GB RAM used, 97 GB available, 115 GB GPU-addressable.
+**System**: 27 GB RAM used, 97 GB available, 115 GB GPU-addressable.
 
 ## Boot Performance
 
 | Phase | Time |
 |-------|------|
-| Firmware (UEFI) | 6.9s |
-| Bootloader (systemd-boot) | 3.5s |
-| Kernel | 5.4s |
-| Userspace to all services | 3.4s |
-| **Total** | **19.3s** |
-
-Zero failed units. No errors.
+| Firmware → services ready | **19.3s** |
