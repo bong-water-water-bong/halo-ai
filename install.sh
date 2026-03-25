@@ -231,8 +231,8 @@ if [ "${NEED_ROCM:-}" = "1" ]; then
         mkdir -p install && tar -xf therock.tar.gz -C install
         sudo ln -sfn /srv/ai/rocm/install /opt/rocm
         echo 'export ROCM_HOME=/opt/rocm
-export PATH=/opt/rocm/bin:$PATH
-export LD_LIBRARY_PATH=/opt/rocm/lib:$LD_LIBRARY_PATH' | sudo tee /etc/profile.d/rocm.sh >/dev/null
+export PATH=/opt/rocm/bin:${PATH:-}
+export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}' | sudo tee /etc/profile.d/rocm.sh >/dev/null
         source /etc/profile.d/rocm.sh
         ok "ROCm installed. Verifying GPU..."
         rocminfo | grep -q gfx1151 && ok "gfx1151 detected" || warn "GPU not detected — may need reboot"
