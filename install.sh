@@ -8,7 +8,7 @@ CYAN='\033[0;36m'; MAGENTA='\033[0;35m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033
 
 # ── Halo AI branded output ────────────────────────
 STEP_CURRENT=0
-STEP_TOTAL=16
+STEP_TOTAL=17
 
 step() {
     STEP_CURRENT=$((STEP_CURRENT + 1))
@@ -29,17 +29,12 @@ clear
 echo ''
 echo -e "${CYAN}${BOLD}"
 cat << 'BANNER'
-          .=============.
-         //  .: ✦ :.  \\
-        ||               ||
-         \\  ': ✦ :'  //
-          '============='
-              || ||
-         ╔════╧══╧════╗
-         ║  █▀█  ▀█▀  ║
-         ║  █▀█   █   ║
-         ║  █ █  ▄█▄  ║
-         ╚════════════╝
+  ╔═══════════════════════════════════╗
+  ║>>  H  A  L  O  ═══════  A  I  >>║
+  ╠═══════════════════════════════════╣
+  ║>>  bare-metal ai stack         >>║
+  ║>>  gfx1151 │ 89t/s │ 115GB    >>║
+  ╚═══════════════════════════════════╝
 BANNER
 echo -e "${NC}"
 echo -e "${DIM}  Bare-metal AI stack for AMD Strix Halo${NC}"
@@ -126,7 +121,7 @@ info "Select which services to enable via systemd."
 info "Toggle with the number key, press Enter when done."
 echo ''
 
-ALL_SERVICES=(llama-server whisper lemonade open-webui n8n comfyui searxng qdrant dashboard caddy)
+ALL_SERVICES=(llama-server whisper lemonade open-webui n8n comfyui searxng qdrant dashboard caddy meek)
 SERVICE_LABELS=(
     "llama-server  — LLM inference (HIP + Vulkan)"
     "whisper       — Speech-to-text"
@@ -138,6 +133,7 @@ SERVICE_LABELS=(
     "qdrant        — Vector database for RAG"
     "dashboard     — GPU metrics + service health"
     "caddy         — Reverse proxy with TLS"
+    "meek          — Security monitoring agent (recommended)"
 )
 # All enabled by default
 ENABLED=()
@@ -170,7 +166,7 @@ while true; do
             for i in "${!ALL_SERVICES[@]}"; do ENABLED[$i]=0; done
             echo ''
             ;;
-        [1-9]|10)
+        [1-9]|1[01])
             idx=$((choice - 1))
             if [ "$idx" -ge 0 ] && [ "$idx" -lt "${#ALL_SERVICES[@]}" ]; then
                 ENABLED[$idx]=$(( 1 - ENABLED[$idx] ))
@@ -422,6 +418,7 @@ for svc in "${SELECTED_SERVICES[@]}"; do
     case "$svc" in
         dashboard) unit="halo-dashboard-api.service"; unit2="halo-dashboard-ui.service" ;;
         whisper)   unit="halo-whisper-server.service" ;;
+        meek)      continue ;;  # Meek units are installed separately above
         *)         unit="halo-${svc}.service" ;;
     esac
     if [ -f "/etc/systemd/system/$unit" ]; then
@@ -442,24 +439,61 @@ sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
 
 ok "System configured"
 
+# ── Meek security agent ───────────────────────────
+if printf '%s\n' "${SELECTED_SERVICES[@]}" | grep -qx meek; then
+    step "Installing Meek security agent"
+    info "Cloning Meek repo..."
+    cd /srv/ai
+    sudo btrfs subvolume create /srv/ai/meek 2>/dev/null || true
+    sudo chown -R "$HALO_USER":"$HALO_USER" /srv/ai/meek
+    [ -d /srv/ai/meek/.git ] || git clone https://github.com/bong-water-water-bong/meek /srv/ai/meek
+    mkdir -p /srv/ai/meek/reports
+    ok "Meek cloned to /srv/ai/meek/"
+
+    info "Installing Meek systemd units..."
+    sudo cp /srv/ai/meek/systemd/meek-watch.service /srv/ai/meek/systemd/meek-scan.service /srv/ai/meek/systemd/meek-scan.timer /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable meek-watch.service meek-scan.timer
+    ok "Meek systemd units installed and timer enabled"
+fi
+
 # ── Done ───────────────────────────────────────────
 echo ''
 echo ''
 echo -e "${GREEN}${BOLD}"
 cat << 'DONE'
-         ╔════════════╗
-         ║  █▀█  ▀█▀  ║
-         ║  █▀█   █   ║
-         ║  █ █  ▄█▄  ║
-         ╚════════════╝
-      Installation Complete
+  ╔═══════════════════════════════════╗
+  ║>>  H A L O · A I  ━━  READY   >>║
+  ╚═══════════════════════════════════╝
 DONE
 echo -e "${NC}"
 echo -e "${GREEN}${BOLD}  Installation complete!${NC}"
 echo ''
 echo -e "  ${CYAN}Enabled services:${NC} ${SELECTED_SERVICES[*]}"
 echo ''
+
+# ── CRITICAL: Password change warning ─────────────
+if [ "$CADDY_PASSWORD" = "Caddy" ]; then
+echo ''
+echo -e "${RED}${BOLD}  ╔══════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${RED}${BOLD}  ║                                                              ║${NC}"
+echo -e "${RED}${BOLD}  ║   *** SECURITY WARNING: DEFAULT PASSWORD IN USE ***          ║${NC}"
+echo -e "${RED}${BOLD}  ║                                                              ║${NC}"
+echo -e "${RED}${BOLD}  ║   The Caddy reverse proxy is using the default password.     ║${NC}"
+echo -e "${RED}${BOLD}  ║   Anyone who knows this password can access ALL services.    ║${NC}"
+echo -e "${RED}${BOLD}  ║                                                              ║${NC}"
+echo -e "${RED}${BOLD}  ║   You MUST change it immediately after first boot:           ║${NC}"
+echo -e "${RED}${BOLD}  ║                                                              ║${NC}"
+echo -e "${RED}${BOLD}  ║      /srv/ai/scripts/halo-change-password.sh                 ║${NC}"
+echo -e "${RED}${BOLD}  ║                                                              ║${NC}"
+echo -e "${RED}${BOLD}  ╚══════════════════════════════════════════════════════════════╝${NC}"
+echo ''
+fi
+
 echo -e "  ${BOLD}Next steps:${NC}"
+echo ''
+echo -e "  ${RED}${BOLD}0.${NC} ${RED}${BOLD}CHANGE THE DEFAULT CADDY PASSWORD:${NC}"
+echo -e "     ${BOLD}/srv/ai/scripts/halo-change-password.sh${NC}"
 echo ''
 echo -e "  ${YELLOW}1.${NC} Reboot to activate GPU memory (115GB GTT):"
 echo -e "     ${DIM}sudo reboot${NC}"
@@ -469,6 +503,7 @@ for svc in "${SELECTED_SERVICES[@]}"; do
     case "$svc" in
         dashboard) START_UNITS+="halo-dashboard-api halo-dashboard-ui " ;;
         whisper)   START_UNITS+="halo-whisper-server " ;;
+        meek)      START_UNITS+="meek-watch meek-scan.timer " ;;
         *)         START_UNITS+="halo-${svc} " ;;
     esac
 done

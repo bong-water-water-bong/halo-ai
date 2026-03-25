@@ -721,3 +721,16 @@ cat /srv/ai/logs/backup.log
 ### Dependencies
 
 - None. Runs independently of all services.
+
+---
+
+### Meek (Security Agent)
+
+- **Purpose**: Autonomous security monitoring with the Reflex agent group
+- **Schedule**: Continuous monitoring + daily full scans
+- **Config**: /srv/ai/meek/
+- **Reports**: /srv/ai/meek/reports/
+- **Agents**: Pulse, Ghost, Gate, Shadow, Fang, Mirror, Vault, Net, Shield
+- **Commands**: `meek scan`, `meek status`, `meek report`, `meek watch`
+- **Systemd**: meek-watch.service (continuous), meek-scan.timer (daily at 06:00)
+- **Recommendation**: Enabled by default for continuous security monitoring
