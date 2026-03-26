@@ -106,6 +106,7 @@ See [Agent Marketplace](docs/AGENTS.md) for full documentation.
 | [Security](docs/SECURITY.md) | Firewall, SSH, TLS certs, password rotation |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues, fixes, command reference |
 | [VPN Access](docs/VPN.md) | WireGuard, Tailscale, Nebula setup |
+| [Stack Protection](docs/STACK-PROTECTION.md) | Why Arch updates won't break your AI stack |
 | [Benchmarks](BENCHMARKS.md) | Full performance data |
 | [Server Access](docs/SECURITY.md#caddy-authentication) | Hostname setup, HTTPS certs, API access |
 
