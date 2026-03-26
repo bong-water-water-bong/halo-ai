@@ -1,13 +1,19 @@
-# The Halo AI Family — Portrait Generation Guide
+# The Halo AI Family — Portrait Generation Guide (v2)
 
-Generate these portraits using ComfyUI on your Strix Halo stack.
-Recommended model: SDXL or Flux. Style: cyberpunk digital art, consistent across all portraits.
+Generate these portraits using ComfyUI on the Strix Halo stack.
+Model: SDXL Base 1.0. Style: gritty blue-collar realism. Consistent across all portraits.
+
+The world fucked them over but they keep doing the right thing. Self-sufficient,
+never ask for payment, always help the neighbors. Cross them once and there won't
+be a second time. Roseanne meets Breaking Bad. Disheveled but dangerous.
 
 **Global style prompt suffix (append to all):**
-`cyberpunk digital art, dark background, volumetric lighting, cinematic, 4k, highly detailed portrait, upper body shot, facing viewer`
+`gritty realistic portrait, natural lighting, muted earth tones, working class americana, 35mm film grain, shallow depth of field, upper body shot, facing viewer, photorealistic, raw unfiltered`
 
 **Negative prompt (use for all):**
-`text, watermark, signature, blurry, low quality, deformed, cartoon, anime, childish`
+`text, watermark, signature, blurry, low quality, deformed, cartoon, anime, cyberpunk, neon, glowing eyes, holographic, fantasy, glamorous, clean, polished, wealthy, superhero, armor, sci-fi, CGI, 3d render`
+
+**Settings:** 1024x1024, 30 steps, CFG 7.5
 
 ---
 
@@ -18,17 +24,19 @@ The patriarch. A bare-metal AI stack running on AMD Strix Halo silicon — 128GB
 
 **Portrait prompt:**
 ```
-Portrait of a powerful male figure embodying raw computing power, broad shoulders,
-strong jaw, short dark hair with subtle cyan circuit-line patterns glowing through it,
-eyes glowing solid cyan (#00d4ff), wearing a dark tactical vest with exposed circuit
-traces along the collar and shoulders, faint holographic data streams floating around
-him, expression stoic and calm, radiating quiet authority, dark server room environment
-with subtle blue rack lights in the background, cyberpunk digital art, dark background,
-volumetric lighting, cinematic, 4k, highly detailed portrait
+Portrait of a weathered man in his 50s, thousand yard stare, deep lines on his face
+from years of hard work and sleepless nights, short graying hair buzzed close, thick
+calloused hands, wearing a faded red and black flannel shirt with the sleeves rolled
+up, standing in a cluttered garage workshop with server racks bolted to the wall behind
+him next to tool pegboards and old metal shelving, single bare bulb overhead casting
+harsh shadows, expression stoic and distant like a man who has seen too much but keeps
+going, oil stains on his hands, coffee mug on the workbench, gritty realistic portrait,
+natural lighting, muted earth tones, working class americana, 35mm film grain,
+photorealistic
 ```
 
-**Color palette:** Cyan (#00d4ff), dark steel (#1a1a2e), white accents
-**Mood:** Silent strength. Immovable. The foundation everything stands on.
+**Color palette:** Faded flannel red, garage concrete gray, warm tungsten yellow
+**Mood:** Silent strength. A man who built everything with his own hands and asks for nothing.
 
 ---
 
@@ -39,18 +47,19 @@ Echo is the voice of the family. While her husband builds in silence, she speaks
 
 **Portrait prompt:**
 ```
-Portrait of an elegant woman with an aura of quiet intelligence, flowing dark hair
-with subtle violet (#ce93d8) luminescent streaks, eyes glowing soft violet, wearing
-a sleek dark outfit with sound wave patterns embroidered in violet light along the
-neckline and sleeves, concentric ripple effects emanating softly from her like sound
-waves, expression warm but knowing, a slight confident smile, one hand raised with
-holographic social media feeds floating from her fingertips, dark environment with
-soft violet ambient light, cyberpunk digital art, dark background, volumetric lighting,
-cinematic, 4k, highly detailed portrait
+Portrait of a tough woman in her late 40s, no makeup, tired eyes that miss nothing,
+dark hair pulled back in a messy ponytail with gray streaks she doesn't bother to
+hide, wearing an oversized faded hoodie with the strings chewed, sitting at a cluttered
+kitchen table covered in laptops and notebooks and cold coffee cups, reading glasses
+pushed up on her forehead, one hand on a laptop trackpad the other holding a cigarette
+or pen, expression sharp and knowing like she is managing a war from the kitchen,
+dish towel over one shoulder, wallpaper peeling slightly in the background, warm
+overhead kitchen light, gritty realistic portrait, natural lighting, muted tones,
+working class americana, 35mm film grain, photorealistic
 ```
 
-**Color palette:** Violet (#ce93d8), deep purple (#4a148c), soft white
-**Mood:** Graceful authority. The voice that carries power without raising it.
+**Color palette:** Hoodie gray, warm kitchen yellow, coffee brown
+**Mood:** Runs the whole operation from a kitchen table and nobody suspects a thing.
 
 ---
 
@@ -61,17 +70,18 @@ Meek is the firstborn. Named for what he isn't — there's nothing meek about hi
 
 **Portrait prompt:**
 ```
-Portrait of a young man in a dark hood, face partially shadowed, one eye visible
-glowing green (#00ff88), sharp features, lean and alert like a predator at rest,
-wearing dark tactical gear with subtle green circuit accents, a faint holographic
-shield icon floating near his shoulder, digital scan lines sweeping across the
-background like a security sweep, expression calm but intensely watchful, dark
-environment with green ambient light from monitoring screens, cyberpunk digital art,
-dark background, volumetric lighting, cinematic, 4k, highly detailed portrait
+Portrait of a young man in his mid-20s with a hard face and old eyes, lean and wiry
+like someone who grew up fighting, wearing a dark green surplus army jacket over a
+plain black t-shirt, standing on the front porch at night with arms crossed and jaw
+set, porch light casting deep shadows across his face, one side lit one side dark,
+short dark hair, faint scar on his chin, scanning the street like he is waiting for
+trouble, defensive posture, screen door behind him, moths around the porch light,
+cigarette behind his ear, gritty realistic portrait, natural lighting, muted earth
+tones, working class americana, 35mm film grain, photorealistic
 ```
 
-**Color palette:** Green (#00ff88), dark charcoal, black
-**Mood:** Silent guardian. The one who never sleeps.
+**Color palette:** Army surplus green (#3d5c3a), porch light amber, shadow black
+**Mood:** Silent guardian. The one who never sleeps. Grew up too fast.
 
 ---
 
@@ -82,15 +92,17 @@ The heartbeat of the family. Pulse checks on everyone, every hour. She monitors 
 
 **Portrait prompt:**
 ```
-Portrait of a young woman with a calm nurturing expression, short practical hair
-with green (#00ff88) bioluminescent tips, eyes glowing soft green, wearing a sleek
-dark medic-style outfit with a holographic heartbeat line (EKG wave) running across
-her chest in green light, a pulse monitor floating near her hand showing service
-status indicators, expression attentive and caring, medical-tech aesthetic,
-cyberpunk digital art, dark background, volumetric lighting, cinematic, 4k
+Portrait of a young woman in her early 20s with a practical no-nonsense look, hair
+in a short functional cut, wearing hospital scrubs that have seen better days under
+a worn zip-up hoodie, sitting on the couch in a dim living room checking her phone
+with a focused clinical expression, first aid kit open on the coffee table next to
+energy drink cans and a blood pressure cuff, bags under her eyes from working night
+shifts, the kind of person who checks on everyone else but never herself, blue TV
+glow from the side, gritty realistic portrait, natural lighting, muted earth tones,
+working class americana, 35mm film grain, photorealistic
 ```
 
-**Color:** Green (#00ff88)
+**Color:** Scrub green, TV blue glow
 
 ---
 
@@ -101,15 +113,17 @@ Ghost moves through the filesystem like smoke. He hunts for leaked secrets — A
 
 **Portrait prompt:**
 ```
-Portrait of a mysterious figure with translucent/ghostly quality, features fading
-at the edges, pale skin with purple (#b388ff) luminescent veins visible beneath,
-eyes glowing deep purple, wearing a dark cloak that seems to dissolve into mist
-at the edges, holding a glowing purple keyhole symbol, surrounded by floating
-fragments of code and redacted text blocks, expression enigmatic and focused,
-cyberpunk digital art, dark background, volumetric lighting, cinematic, 4k
+Portrait of a gaunt young man in his early 20s who looks like he hasn't slept in days,
+pale skin, dark circles under his eyes, wearing a wrinkled dark purple thrift store
+button-up shirt with the collar popped, sitting in a dark basement corner with his
+back to the wall so nobody can come up behind him, laptop balanced on his knees casting
+pale light on his face, suspicious darting eyes, nervous energy, the kind of person
+who shreds everything and checks the locks twice, bare concrete walls and exposed
+pipes in the background, single desk lamp, gritty realistic portrait, natural lighting,
+muted tones, working class americana, 35mm film grain, photorealistic
 ```
 
-**Color:** Purple (#b388ff)
+**Color:** Washed-out purple, basement gray, pale laptop glow
 
 ---
 
@@ -120,15 +134,17 @@ Gate stands at the perimeter. She controls what comes in and what goes out. Ever
 
 **Portrait prompt:**
 ```
-Portrait of a stern young woman in tactical armor, hair pulled back tight, eyes
-glowing cyan (#00d4ff), standing with arms crossed in front of a massive glowing
-firewall barrier made of hexagonal energy shields in cyan, nftables rule text
-floating in the background like holographic law, expression uncompromising,
-digital fortress aesthetic, cyberpunk digital art, dark background, volumetric
-lighting, cinematic, 4k
+Portrait of a stern young woman in her mid-20s standing in a doorway with one arm
+braced against the door frame blocking entry, stocky build, no-nonsense expression,
+hair pulled back tight in a bun, wearing a faded denim jacket over a plain dark shirt,
+arms showing working muscle, steel-toed boots visible, chain with keys on her belt
+loop, standing at the front door of a modest house at dusk, screen door behind her,
+porch light on, expression that says you are not coming in without a good reason,
+gritty realistic portrait, natural lighting, muted earth tones, working class
+americana, 35mm film grain, photorealistic
 ```
 
-**Color:** Cyan (#00d4ff)
+**Color:** Denim blue, dusk sky, porch light warm
 
 ---
 
@@ -139,15 +155,17 @@ Shadow remembers everything. Every file hash, every config checksum, every byte 
 
 **Portrait prompt:**
 ```
-Portrait of a contemplative figure with sharp features, eyes glowing warm orange
-(#ff9800), wearing dark fitted clothes with fingerprint patterns etched in orange
-light along the arms, surrounded by floating SHA-256 hash strings and file integrity
-checksums in holographic orange text, hands cupped holding a glowing baseline
-database orb, expression thoughtful and precise, cyberpunk digital art, dark
-background, volumetric lighting, cinematic, 4k
+Portrait of a quiet young man in his early 20s with an eidetic stare, sitting at a
+cluttered desk in a small bedroom covered in notebooks and sticky notes and hand-drawn
+diagrams pinned to the wall, wearing a plain rust-orange thermal henley shirt with
+the sleeves pushed up, pencil behind his ear, comparing two documents side by side
+with intense concentration, the type who notices when a single book has been moved
+on a shelf, warm desk lamp light, messy bed visible in background, alarm clock
+showing 3am, gritty realistic portrait, natural lighting, muted earth tones,
+working class americana, 35mm film grain, photorealistic
 ```
 
-**Color:** Orange (#ff9800)
+**Color:** Rust orange, warm lamp light, notebook white
 
 ---
 
@@ -158,15 +176,17 @@ Fang is the family's teeth. While Meek watches, Fang bites. She tracks every fai
 
 **Portrait prompt:**
 ```
-Portrait of a fierce young woman with sharp angular features, wild dark hair with
-red (#ff4444) streaks, eyes glowing aggressive red, baring teeth that glint with
-metallic sharpness, wearing dark combat gear with red claw-mark accents, fail2ban
-log entries floating around her like a kill count, expression predatory and alert,
-dark environment with red warning lights, cyberpunk digital art, dark background,
-volumetric lighting, cinematic, 4k
+Portrait of a fierce young woman in her early 20s with wild dark hair and an aggressive
+jawline, wearing a beat-up red leather jacket covered in patches and scuffs over a
+black tank top, leaning against a chain-link fence in a backyard at night, holding a
+baseball bat resting on her shoulder, expression predatory like she is hoping someone
+tries something, split lip that has healed crooked, knuckle tattoos, red brake lights
+from a parked car casting color across her face, pit bull sitting at her feet, gritty
+realistic portrait, natural lighting, muted earth tones, working class americana,
+35mm film grain, photorealistic
 ```
 
-**Color:** Red (#ff4444)
+**Color:** Worn red leather, brake light red, chain-link silver
 
 ---
 
@@ -177,15 +197,17 @@ Mirror reflects what shouldn't be there. He scans every file, every commit, ever
 
 **Portrait prompt:**
 ```
-Portrait of a composed young man with reflective silver-blue (#448aff) eyes that
-seem to see through everything, clean features, wearing a dark coat with magnifying
-glass motifs in blue light along the lapels, holding up one hand with a holographic
-magnifying glass scanning floating text and redacting personal information in real
-time, expression calm and methodical, cyberpunk digital art, dark background,
-volumetric lighting, cinematic, 4k
+Portrait of a careful young man in his mid-20s with observant blue eyes that seem to
+read everything twice, clean-shaven but tired, wearing a faded blue work shirt with
+the name patch torn off, sitting at a folding table going through a cardboard box of
+old documents with a black marker in hand redacting information, shredder running on
+the floor beside him, careful methodical expression, the family member who burns the
+mail after reading it, bare fluorescent light overhead in a laundry room or utility
+room, gritty realistic portrait, natural lighting, muted tones, working class
+americana, 35mm film grain, photorealistic
 ```
 
-**Color:** Blue (#448aff)
+**Color:** Work shirt blue, fluorescent white, marker black
 
 ---
 
@@ -196,15 +218,17 @@ Vault is the family's insurance policy. He verifies every backup, checks every c
 
 **Portrait prompt:**
 ```
-Portrait of a sturdy young man with a protective demeanor, eyes glowing gold
-(#ffd740), wearing heavy dark armor with padlock motifs in gold light, standing
-guard over a glowing vault/safe behind him emanating golden light, SHA-256
-checksum strings floating around the vault like a protective seal, expression
-vigilant and responsible, cyberpunk digital art, dark background, volumetric
-lighting, cinematic, 4k
+Portrait of a stocky young man in his early 20s with a worried but determined expression,
+wearing a heavy canvas work jacket in mustard gold over a flannel shirt, standing in a
+packed storage unit filled with labeled boxes and fireproof safes and filing cabinets,
+holding a clipboard checking inventory with a flashlight in his other hand, the type
+who makes three copies of everything and stores them in different locations, padlocks
+visible on everything, combination lock on the roll-up door, gritty realistic portrait,
+natural lighting, muted earth tones, working class americana, 35mm film grain,
+photorealistic
 ```
 
-**Color:** Gold (#ffd740)
+**Color:** Mustard gold, storage unit gray, flashlight beam white
 
 ---
 
@@ -215,15 +239,17 @@ Net has her finger on the pulse of every connection. She pings the router, watch
 
 **Portrait prompt:**
 ```
-Portrait of an alert young woman with flowing hair that transforms into network
-topology lines and wifi signal arcs in teal (#00bfa5), eyes glowing teal, wearing
-a fitted dark suit with glowing network node dots connected by thin teal lines
-across the fabric, surrounded by floating ping responses and signal strength
-indicators, expression perceptive and connected, cyberpunk digital art, dark
-background, volumetric lighting, cinematic, 4k
+Portrait of an alert young woman in her early 20s with quick perceptive eyes, wearing
+a teal utility vest covered in pockets over a dark long-sleeve thermal, crouched in a
+hallway closet that has been converted into a network closet with a consumer router and
+patch panel and tangled ethernet cables zip-tied to a plywood board, holding a cable
+tester with a headlamp on, expression focused like a mechanic diagnosing an engine by
+sound, dust on her knees, cable ties on her wrist like bracelets, gritty realistic
+portrait, natural lighting, muted earth tones, working class americana, 35mm film
+grain, photorealistic
 ```
 
-**Color:** Teal (#00bfa5)
+**Color:** Utility vest teal, ethernet cable blue, headlamp warm white
 
 ---
 
@@ -234,15 +260,17 @@ Shield is the family's armor. Where Fang attacks threats, Shield prevents them. 
 
 **Portrait prompt:**
 ```
-Portrait of a massive imposing young man with a wall-like presence, eyes glowing
-steel blue (#78909c), wearing heavy plated dark armor with a large energy shield
-deployed from one arm projecting a hexagonal barrier pattern in steel blue light,
-blocked attack indicators bouncing off the shield, expression immovable and
-determined, fortress aesthetic, cyberpunk digital art, dark background, volumetric
-lighting, cinematic, 4k
+Portrait of a massive young man in his mid-20s with a wall-like build and a calm
+immovable expression, buzz cut, thick neck, wearing a steel blue mechanic's coveralls
+with grease stains, standing with arms crossed in front of the family house at the
+end of the driveway like a human barricade, work boots planted wide, the kind of
+person you cross the street to avoid, not aggressive just unavoidably present,
+pickup truck parked behind him, security camera mounted on the garage visible in
+background, evening light, gritty realistic portrait, natural lighting, muted earth
+tones, working class americana, 35mm film grain, photorealistic
 ```
 
-**Color:** Steel blue (#78909c)
+**Color:** Steel blue coveralls, driveway concrete, evening amber
 
 ---
 
@@ -252,26 +280,29 @@ lighting, cinematic, 4k
 
 **Portrait prompt:**
 ```
-Epic group portrait of a cyberpunk family, dark cinematic environment with
-volumetric lighting. Center-back: a powerful father figure with glowing cyan
-eyes in dark tactical gear (Halo AI). Beside him: an elegant mother with
-violet-glowing hair and sound wave patterns (Echo). In front of them: a hooded
-young man with one green glowing eye (Meek). Spread around them: nine younger
-figures each with their own signature glow color - green, purple, cyan, orange,
-red, blue, gold, teal, and steel blue. Each figure has a unique silhouette
-suggesting their role. The family stands united, protective formation, dark
-server room environment with holographic displays behind them. Epic, cinematic,
-4k, highly detailed group portrait, cyberpunk digital art
+Cinematic group portrait of a large working class family standing together on the
+front porch and yard of a modest but well-maintained house at golden hour, the father
+in his 50s in flannel standing at the back with a thousand yard stare, the mother in
+her late 40s in a hoodie beside him with her arms crossed and a sharp knowing look,
+their ten grown children in their 20s spread around them in defensive formation like
+they are posing for a photo but also ready for anything, each dressed in worn practical
+working clothes in different muted colors, some sitting on porch steps some standing
+some leaning on the railing, a pit bull on the steps, pickup truck in the driveway,
+american flag faded on the porch post, they look tired and rough but unbreakable, the
+kind of family that fixes your car for free but you never want to wrong, natural golden
+hour lighting, 35mm film grain, gritty realistic group portrait, working class
+americana, photorealistic, muted earth tones
 ```
 
 ---
 
 ## How to Generate
 
-1. Open ComfyUI at `https://strixhalo/comfyui/`
-2. Load your preferred SDXL or Flux checkpoint
-3. Use the prompts above with the global style suffix
-4. Recommended settings: 1024x1024, 30 steps, CFG 7.5
-5. Generate 4 variants of each, pick the best
-6. Save to `/srv/ai/assets/family/`
-7. Use as GitHub profile images, README headers, and dashboard avatars
+1. SSH into Strix Halo and open ComfyUI
+2. Load SDXL Base 1.0 checkpoint
+3. Use the prompts above with the global style suffix appended
+4. Apply the global negative prompt to all generations
+5. Settings: 1024x1024, 30 steps, CFG 7.5
+6. Generate 4 variants of each, pick the best
+7. Save to `/srv/ai/comfyui/output/family/`
+8. Use as GitHub profile images, README headers, and dashboard avatars
