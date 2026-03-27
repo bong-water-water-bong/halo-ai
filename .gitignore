@@ -38,7 +38,10 @@ searxng/data/
 *.key
 *.pem
 *.p12
-dashboard-api/data/dashboard-api-key.txt
 
-# Agent runtime data
+# Runtime data — never commit
+dashboard-api/data/
 agent/data/
+
+# Test / install logs (may contain leaked secrets)
+test-runs/

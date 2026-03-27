@@ -108,7 +108,9 @@ def save_state(state: AgentState):
 # ── Shell Helpers ──────────────────────────────────────
 def run(cmd, timeout=30):
     try:
-        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+        if isinstance(cmd, str):
+            cmd = shlex.split(cmd)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
         return r.returncode, r.stdout.strip(), r.stderr.strip()
     except subprocess.TimeoutExpired:
         return -1, "", "timeout"
@@ -126,23 +128,25 @@ def notify(title, message, level="critical"):
 # ── Service Monitoring ─────────────────────────────────
 def check_service(name, config):
     """Check if a service is running and healthy."""
-    code, out, _ = run(f"systemctl is-active {name}")
+    code, out, _ = run(["systemctl", "is-active", name])
     if out != "active":
         return False, "not running"
-    
+
     # HTTP health check
     port = config["port"]
     health = config["health"]
-    code, out, _ = run(f"curl -s -o /dev/null -w '%{{http_code}}' --connect-timeout 5 http://127.0.0.1:{port}{health}")
+    code, out, _ = run(["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
+                        "--connect-timeout", "5", f"http://127.0.0.1:{port}{health}"])
     if code != 0 or out not in ("200", "301", "302", "307", "308"):
         return False, f"health check failed (HTTP {out})"
-    
+
     return True, "healthy"
 
 def snapshot_before_repair(reason):
     """Take a Btrfs snapshot before any repair action."""
-    run(f'snapper -c root create --type single --cleanup-algorithm number '
-        f'--description "halo-agent pre-repair: {reason} {datetime.now():%Y%m%d-%H%M%S}"')
+    desc = f"halo-agent pre-repair: {reason} {datetime.now():%Y%m%d-%H%M%S}"
+    run(["snapper", "-c", "root", "create", "--type", "single",
+         "--cleanup-algorithm", "number", "--description", desc])
 
 def repair_service(name, config, state: AgentState):
     """Attempt to repair a failed service."""
