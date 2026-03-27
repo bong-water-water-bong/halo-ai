@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/family/01-halo-ai_00001_.png?v=3" width="280" alt="halo ai"/>
+<img src="assets/avatars/halo-ai.svg" alt="halo ai" width="200">
 
 # halo-ai
 
@@ -20,7 +20,7 @@
 
 <div align="center">
 
-<img src="assets/family/13-family-group_00001_.png?v=3" width="720" alt="the ai family"/>
+<img src="assets/avatars/family.svg" alt="the ai family" width="720">
 
 </div>
 
