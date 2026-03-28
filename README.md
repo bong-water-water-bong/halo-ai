@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/bong-water-water-bong/halo-ai/main/assets/avatars/halo-ai.svg" alt="halo ai" width="200">
+<picture>
+  <img src="https://raw.githubusercontent.com/bong-water-water-bong/halo-ai/main/assets/avatars/halo-ai.svg" alt="halo ai" width="200">
+</picture>
 
 # halo-ai
 
@@ -22,7 +24,9 @@
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/bong-water-water-bong/halo-ai/main/assets/avatars/family.svg" alt="the ai family" width="720">
+<picture>
+  <img src="https://raw.githubusercontent.com/bong-water-water-bong/halo-ai/main/assets/avatars/family.svg" alt="the ai family" width="720">
+</picture>
 
 </div>
 
