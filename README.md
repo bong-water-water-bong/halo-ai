@@ -10,7 +10,7 @@
 
 **109 tok/s. Zero containers. 115GB GPU memory. Compiled from source.**
 
-*designed and built by the architect*
+*stamped by the architect*
 
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=flat&logo=archlinux&logoColor=white)](https://archlinux.org)
 [![ROCm](https://img.shields.io/badge/ROCm_7.13-ED1C24?style=flat&logo=amd&logoColor=white)](https://rocm.docs.amd.com)
