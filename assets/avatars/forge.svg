@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect width="128" height="128" rx="20" fill="#0d1117"/>
+  <!-- Anvil base -->
+  <rect x="32" y="68" width="64" height="8" rx="2" fill="#ff6600"/>
+  <rect x="40" y="56" width="48" height="12" rx="3" fill="#ff6600"/>
+  <rect x="44" y="76" width="40" height="6" rx="1" fill="#ff6600" opacity="0.6"/>
+  <!-- Hammer -->
+  <rect x="56" y="18" width="6" height="34" rx="2" fill="#ff6600" opacity="0.8" transform="rotate(-25 59 35)"/>
+  <rect x="46" y="14" width="26" height="12" rx="3" fill="#ff6600" transform="rotate(-25 59 20)"/>
+  <!-- Sparks -->
+  <circle cx="38" cy="48" r="2" fill="#ffaa00" opacity="0.9"/>
+  <circle cx="30" cy="42" r="1.5" fill="#ffaa00" opacity="0.7"/>
+  <circle cx="44" cy="40" r="1" fill="#ffaa00" opacity="0.8"/>
+  <circle cx="34" cy="54" r="1.5" fill="#ffcc00" opacity="0.6"/>
+  <circle cx="90" cy="46" r="1.5" fill="#ffaa00" opacity="0.7"/>
+  <circle cx="96" cy="52" r="1" fill="#ffcc00" opacity="0.5"/>
+  <!-- Voxel cubes (what forge builds) -->
+  <rect x="84" y="24" width="8" height="8" fill="#ff6600" opacity="0.4"/>
+  <rect x="92" y="28" width="8" height="8" fill="#ff6600" opacity="0.3"/>
+  <rect x="88" y="16" width="8" height="8" fill="#ff6600" opacity="0.25"/>
+  <!-- Label -->
+  <text x="64" y="108" text-anchor="middle" font-family="monospace" font-size="10" fill="#ff6600" font-weight="bold">forge</text>
+</svg>
