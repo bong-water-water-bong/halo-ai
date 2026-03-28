@@ -29,7 +29,7 @@ GPU_BACKEND = os.environ.get("GPU_BACKEND", "nvidia")
 
 def _read_manifest_file(path: Path) -> dict[str, Any]:
     """Load a JSON or YAML extension manifest file."""
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     if path.suffix.lower() == ".json":
         data = json.loads(text)
     else:

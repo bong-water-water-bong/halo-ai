@@ -94,9 +94,11 @@ fi
 # ── Update Caddyfile ───────────────────────────────
 echo -e "  ${DIM}    ... Updating Caddyfile${NC}"
 
-# Extract the current hash (the line with "admin $2a$..." or "admin $2b$...")
-# Replace whatever hash is on the admin line in the basicauth block
-sed -i "s|        admin \$2[aby]\$.*|        admin ${NEW_HASH}|" "$CADDYFILE"
+# Extract the current hash (the line with "caddy $2a$..." or "caddy $2b$...")
+# Replace whatever hash is on the caddy line in the basicauth block
+# Escape sed metacharacters in the bcrypt hash (contains $, /, etc.)
+ESCAPED_HASH=$(printf '%s\n' "$NEW_HASH" | sed -e 's/[&/\$]/\\&/g')
+sed -i "s|        caddy \$2[aby]\$[^[:space:]]*|        caddy ${ESCAPED_HASH}|" "$CADDYFILE"
 
 # Verify the update took effect
 if grep -qF "$NEW_HASH" "$CADDYFILE"; then

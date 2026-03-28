@@ -24,7 +24,7 @@ pre_snapshot() {
     # Per-service Btrfs snapshots
     for svc in llama-cpp lemonade whisper-cpp open-webui vane searxng qdrant n8n kokoro comfyui; do
         if [ -d "/srv/ai/$svc/.git" ]; then
-            local hash=$(cd /srv/ai/$svc && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+            local hash=$(cd "/srv/ai/$svc" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
             log "  $svc: current commit $hash"
         fi
     done
@@ -79,7 +79,7 @@ rollback() {
 stop_services() {
     log "Stopping all halo-ai services..."
     for svc in halo-llama-server halo-lemonade halo-open-webui halo-vane halo-searxng halo-qdrant halo-n8n halo-comfyui halo-whisper-server; do
-        sudo systemctl stop $svc 2>/dev/null || true
+        sudo systemctl stop "$svc" 2>/dev/null || true
     done
     log "All services stopped"
 }
@@ -94,13 +94,13 @@ start_services() {
     
     local failures=0
     for svc in halo-llama-server halo-lemonade halo-open-webui halo-vane halo-searxng halo-qdrant halo-n8n; do
-        if ! systemctl is-active --quiet $svc 2>/dev/null; then
+        if ! systemctl is-active --quiet "$svc" 2>/dev/null; then
             error "Service $svc failed to start after update"
             ((failures++))
         fi
     done
     
-    if [ $failures -gt 0 ]; then
+    if [ "$failures" -gt 0 ]; then
         return 1
     fi
     log "All services started successfully"
@@ -130,7 +130,7 @@ update_services() {
     
     for svc in llama-cpp lemonade whisper-cpp open-webui vane searxng qdrant n8n kokoro comfyui; do
         if [ -d "/srv/ai/$svc/.git" ]; then
-            cd /srv/ai/$svc
+            cd "/srv/ai/$svc"
             local before=$(git rev-parse --short HEAD)
             git fetch origin 2>/dev/null
             local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
@@ -185,7 +185,7 @@ rebuild_services() {
     # Python services - reinstall if requirements changed
     for pydir in open-webui searxng kokoro comfyui; do
         if [ -d "/srv/ai/$pydir/.git" ]; then
-            cd /srv/ai/$pydir
+            cd "/srv/ai/$pydir"
             if ! git diff --quiet HEAD@{1} -- requirements*.txt pyproject.toml 2>/dev/null; then
                 log "Reinstalling $pydir (deps changed)..."
                 source .venv/bin/activate 2>/dev/null
@@ -199,7 +199,7 @@ rebuild_services() {
     # Node services - rebuild if package.json changed
     for nodedir in vane n8n; do
         if [ -d "/srv/ai/$nodedir/.git" ]; then
-            cd /srv/ai/$nodedir
+            cd "/srv/ai/$nodedir"
             if ! git diff --quiet HEAD@{1} -- package.json yarn.lock pnpm-lock.yaml 2>/dev/null; then
                 log "Rebuilding $nodedir (deps changed)..."
                 if [ -f yarn.lock ]; then yarn install && yarn build; fi

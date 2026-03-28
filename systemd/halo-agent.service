@@ -16,8 +16,12 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=halo-agent
 ProtectSystem=full
+ProtectHome=read-only
 PrivateTmp=yes
+PrivateDevices=yes
 NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 
 [Install]
 WantedBy=multi-user.target

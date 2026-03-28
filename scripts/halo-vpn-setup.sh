@@ -118,7 +118,7 @@ EOF
 
     # Build client config
     local client_conf_path
-    client_conf_path="$(eval echo ~${SUDO_USER:-$USER})/halo-vpn-${client_name}.conf"
+    client_conf_path="$(getent passwd "${SUDO_USER:-$USER}" | cut -d: -f6)/halo-vpn-${client_name}.conf"
 
     cat > "$client_conf_path" <<EOF
 [Interface]
@@ -294,7 +294,7 @@ EOF
 ok "Peer added to wg0"
 
 # Build client config
-CLIENT_CONF_PATH="$(eval echo ~${SUDO_USER:-$USER})/halo-vpn-${CLIENT_NAME}.conf"
+CLIENT_CONF_PATH="$(getent passwd "${SUDO_USER:-$USER}" | cut -d: -f6)/halo-vpn-${CLIENT_NAME}.conf"
 
 cat > "$CLIENT_CONF_PATH" <<EOF
 [Interface]

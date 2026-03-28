@@ -42,6 +42,14 @@ echo "[1/5] Stopping AI services..."
 sudo systemctl stop halo-comfyui 2>/dev/null || true
 sudo systemctl stop halo-llama-server 2>/dev/null || true
 
+# Cleanup trap — restart services even if thaw fails
+cleanup() {
+    echo "Thaw interrupted or failed — restarting services..."
+    sudo systemctl start halo-comfyui 2>/dev/null || true
+    sudo systemctl start halo-llama-server 2>/dev/null || true
+}
+trap cleanup ERR INT TERM
+
 # 2. Rebuild venv from frozen requirements
 echo "[2/5] Rebuilding venv from frozen state..."
 cd /srv/ai/comfyui

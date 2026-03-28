@@ -25,7 +25,7 @@ def get_active_persona_prompt() -> str:
     persona_file = SETUP_CONFIG_DIR / "persona.json"
     if persona_file.exists():
         try:
-            with open(persona_file) as f:
+            with open(persona_file, encoding="utf-8") as f:
                 data = json.load(f)
                 return data.get("system_prompt", PERSONAS["general"]["system_prompt"])
         except (FileNotFoundError, PermissionError, json.JSONDecodeError):
@@ -43,7 +43,7 @@ async def setup_status(api_key: str = Depends(verify_api_key)):
     progress_file = SETUP_CONFIG_DIR / "setup-progress.json"
     if progress_file.exists():
         try:
-            with open(progress_file) as f:
+            with open(progress_file, encoding="utf-8") as f:
                 step = json.load(f).get("step", 0)
         except (FileNotFoundError, PermissionError, json.JSONDecodeError):
             logger.debug("Failed to read setup-progress.json")
@@ -52,7 +52,7 @@ async def setup_status(api_key: str = Depends(verify_api_key)):
     persona_file = SETUP_CONFIG_DIR / "persona.json"
     if persona_file.exists():
         try:
-            with open(persona_file) as f:
+            with open(persona_file, encoding="utf-8") as f:
                 persona = json.load(f).get("persona")
         except (FileNotFoundError, PermissionError, json.JSONDecodeError):
             logger.debug("Failed to read persona.json for setup status")
@@ -74,10 +74,10 @@ async def setup_persona(request: PersonaRequest, api_key: str = Depends(verify_a
         "system_prompt": persona_info["system_prompt"], "icon": persona_info["icon"],
         "selected_at": datetime.now(timezone.utc).isoformat()
     }
-    with open(SETUP_CONFIG_DIR / "persona.json", "w") as f:
+    with open(SETUP_CONFIG_DIR / "persona.json", "w", encoding="utf-8") as f:
         json.dump(persona_data, f, indent=2)
 
-    with open(SETUP_CONFIG_DIR / "setup-progress.json", "w") as f:
+    with open(SETUP_CONFIG_DIR / "setup-progress.json", "w", encoding="utf-8") as f:
         json.dump({"step": 2, "persona_selected": True}, f)
 
     return {"success": True, "persona": request.persona, "name": persona_info["name"], "message": f"Great choice! Your assistant is now a {persona_info['name']}."}
@@ -88,7 +88,7 @@ async def setup_complete(api_key: str = Depends(verify_api_key)):
     """Mark the first-run setup as complete."""
     SETUP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    with open(SETUP_CONFIG_DIR / "setup-complete.json", "w") as f:
+    with open(SETUP_CONFIG_DIR / "setup-complete.json", "w", encoding="utf-8") as f:
         json.dump({"completed_at": datetime.now(timezone.utc).isoformat(), "version": "1.0.0"}, f, indent=2)
 
     progress_file = SETUP_CONFIG_DIR / "setup-progress.json"

@@ -6,7 +6,7 @@
     tls internal
 
     basicauth * {
-        # Default login: caddy / caddy (change immediately after install!)
+        # CHANGE THIS PASSWORD: Run scripts/halo-change-password.sh after install
         # Generate new hash: caddy hash-password --plaintext 'newpassword'
         caddy $2a$14$GfQWB.bJ0SNHRWVhLTRmt.JRcmXzkmTzpnPzVPvFicuwYwUwDiupy
     }
@@ -33,6 +33,14 @@
 
     handle_path /cave/* {
         reverse_proxy 127.0.0.1:3005
+    }
+
+    handle_path /dashboard/* {
+        reverse_proxy 127.0.0.1:3003
+    }
+
+    handle_path /dashboard-api/* {
+        reverse_proxy 127.0.0.1:3002
     }
 
     # Default to Open WebUI

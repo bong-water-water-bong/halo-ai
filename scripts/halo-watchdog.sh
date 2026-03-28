@@ -110,7 +110,7 @@ check_updates() {
                 local behind
                 behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
                 if [ "$behind" -gt 0 ]; then
-                    log "Update available: $(basename $path) is $behind commits behind upstream"
+                    log "Update available: $(basename "$path") is $behind commits behind upstream"
                     ((updates_available++))
                 fi
             fi

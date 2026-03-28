@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 DASHBOARD_API_KEY = os.environ.get("DASHBOARD_API_KEY")
 if not DASHBOARD_API_KEY:
     DASHBOARD_API_KEY = secrets.token_urlsafe(32)
-    key_file = Path(os.environ.get("DREAM_DATA_DIR", "/srv/ai/dashboard-api/data") + "/dashboard-api-key.txt")
-    key_file.parent.mkdir(parents=True, exist_ok=True)
-    key_file.write_text(DASHBOARD_API_KEY)
-    key_file.chmod(0o600)
+    key_file = Path(os.environ.get("DREAM_DATA_DIR", "/srv/ai/dashboard-api/data")) / "dashboard-api-key.txt"
+    key_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    key_file.touch(mode=0o600, exist_ok=True)
+    key_file.write_text(DASHBOARD_API_KEY, encoding="utf-8")
     logger.warning(
         "DASHBOARD_API_KEY not set. Generated temporary key and wrote to %s (mode 0600). "
         "Set DASHBOARD_API_KEY in your .env file for production.", key_file

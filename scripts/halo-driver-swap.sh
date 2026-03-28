@@ -88,8 +88,11 @@ swap_to() {
     echo "Stopping llama-server..."
     sudo systemctl stop "$SERVICE"
     
-    # Update service file
-    sudo sed -i "s|ExecStart=.*llama-server.*|ExecStart=$bin --host 127.0.0.1 --port 8081 $flags --model /srv/ai/models/qwen3-30b-a3b-q4_k_m.gguf|" "$UNIT"
+    # Update service file — escape sed metacharacters in bin/flags
+    local escaped_bin escaped_flags
+    escaped_bin=$(printf '%s\n' "$bin" | sed -e 's/[&/\]/\\&/g')
+    escaped_flags=$(printf '%s\n' "$flags" | sed -e 's/[&/\]/\\&/g')
+    sudo sed -i "s|ExecStart=.*llama-server.*|ExecStart=${escaped_bin} --host 127.0.0.1 --port 8081 ${escaped_flags} --model /srv/ai/models/qwen3-30b-a3b-q4_k_m.gguf|" "$UNIT"
     sudo systemctl daemon-reload
     
     # Start service

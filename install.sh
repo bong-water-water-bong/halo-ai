@@ -247,13 +247,13 @@ fi
 # ── Python 3.12 + 3.13 ────────────────────────────
 step "Building Python 3.12 + 3.13 (~15 min each)"
 for VER in 3.12.13 3.13.3; do
-    MAJOR=$(echo $VER | cut -d. -f1-2)
-    PREFIX=/opt/python$(echo $MAJOR | tr -d .)
-    if [ -x $PREFIX/bin/python$MAJOR ]; then ok "Python $MAJOR already installed"; continue; fi
+    MAJOR=$(echo "$VER" | cut -d. -f1-2)
+    PREFIX=/opt/python$(echo "$MAJOR" | tr -d .)
+    if [ -x "$PREFIX/bin/python$MAJOR" ]; then ok "Python $MAJOR already installed"; continue; fi
     cd /tmp
     wget -q "https://www.python.org/ftp/python/$VER/Python-$VER.tar.xz"
     tar xf Python-$VER.tar.xz && cd Python-$VER
-    ./configure --prefix=$PREFIX --enable-optimizations -q
+    ./configure --prefix="$PREFIX" --enable-optimizations -q
     make -j$(nproc) -s && sudo make altinstall -s
     ok "Python $MAJOR compiled"
 done
@@ -426,7 +426,7 @@ SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", GROUP="render", MODE="0660
 
 # Kernel param for GPU memory
 ENTRY=$(ls /boot/loader/entries/*.conf | head -1)
-grep -q ttm.pages_limit "$ENTRY" || sudo sed -i 's/^options /options ttm.pages_limit=30146560 /' "$ENTRY"
+grep -q 'ttm\.pages_limit' "$ENTRY" || sudo sed -i 's/^options /options ttm.pages_limit=30146560 /' "$ENTRY"
 
 # Disable sleep/suspend
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target

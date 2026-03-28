@@ -60,7 +60,7 @@ def _update_lifetime_tokens(server_counter: float) -> int:
     data = {"lifetime": 0, "last_server_counter": 0}
     try:
         if _TOKEN_FILE.exists():
-            data = json.loads(_TOKEN_FILE.read_text())
+            data = json.loads(_TOKEN_FILE.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:
         logger.warning("Failed to read token counter file %s: %s", _TOKEN_FILE, e)
 
@@ -71,7 +71,7 @@ def _update_lifetime_tokens(server_counter: float) -> int:
     data["last_server_counter"] = server_counter
 
     try:
-        _TOKEN_FILE.write_text(json.dumps(data))
+        _TOKEN_FILE.write_text(json.dumps(data), encoding="utf-8")
     except OSError as e:
         logger.warning("Failed to write token counter file %s: %s", _TOKEN_FILE, e)
 
@@ -80,7 +80,7 @@ def _update_lifetime_tokens(server_counter: float) -> int:
 
 def _get_lifetime_tokens() -> int:
     try:
-        return json.loads(_TOKEN_FILE.read_text()).get("lifetime", 0)
+        return json.loads(_TOKEN_FILE.read_text(encoding="utf-8")).get("lifetime", 0)
     except (json.JSONDecodeError, OSError):
         return 0
 

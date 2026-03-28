@@ -348,7 +348,7 @@ done
 # ── Step 20: Optionally remove compiled Node.js ─
 step "Optional: Compiled Node.js"
 
-NODE_PATH=$(which node 2>/dev/null || true)
+NODE_PATH=$(command -v node 2>/dev/null || true)
 if [ -n "$NODE_PATH" ]; then
     NODE_PREFIX=$(dirname "$(dirname "$NODE_PATH")")
     echo -e "  ${YELLOW}Node.js found at: $NODE_PATH${NC}"
@@ -375,7 +375,7 @@ fi
 # ── Step 21: Optionally remove Rust toolchain ───
 step "Optional: Rust toolchain (~/.cargo, ~/.rustup)"
 
-REAL_HOME="${SUDO_USER:+$(eval echo "~$SUDO_USER")}"
+REAL_HOME="${SUDO_USER:+$(getent passwd "$SUDO_USER" | cut -d: -f6)}"
 REAL_HOME="${REAL_HOME:-$HOME}"
 
 RUST_FOUND=false

@@ -39,7 +39,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(LOG_FILE),
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
         logging.StreamHandler(sys.stdout),
     ],
 )
@@ -94,27 +94,27 @@ class AgentState:
 def load_state() -> AgentState:
     if STATE_FILE.exists():
         try:
-            data = json.loads(STATE_FILE.read_text())
+            data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
             state = AgentState()
             state.__dict__.update(data)
             return state
-        except Exception:
+        except (json.JSONDecodeError, OSError, KeyError):
             pass
     return AgentState(started_at=datetime.now().isoformat())
 
 def save_state(state: AgentState):
-    STATE_FILE.write_text(json.dumps(state.__dict__, indent=2, default=str))
+    STATE_FILE.write_text(json.dumps(state.__dict__, indent=2, default=str), encoding="utf-8")
 
 # ── Shell Helpers ──────────────────────────────────────
-def run(cmd, timeout=30):
+def run(cmd, timeout=30, shell=False):
     try:
-        if isinstance(cmd, str):
+        if isinstance(cmd, str) and not shell:
             cmd = shlex.split(cmd)
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, shell=shell)
         return r.returncode, r.stdout.strip(), r.stderr.strip()
     except subprocess.TimeoutExpired:
         return -1, "", "timeout"
-    except Exception as e:
+    except (OSError, ValueError) as e:
         return -1, "", str(e)
 
 def notify(title, message, level="critical"):
@@ -174,7 +174,7 @@ def repair_service(name, config, state: AgentState):
     
     # Try restart
     log.info(f"Restarting {name} (attempt {restart_count + 1}/{MAX_RESTART_ATTEMPTS})")
-    code, _, err = run(f"systemctl restart {name}", timeout=60)
+    code, _, err = run(["systemctl", "restart", name], timeout=60)
     time.sleep(5)
     
     healthy, status = check_service(name, config)
@@ -218,7 +218,7 @@ def check_gpu():
                     log.warning(f"GPU temperature elevated: {temp}°C")
     
     # Check amdgpu module
-    code, out, _ = run("lsmod | grep amdgpu")
+    code, out, _ = run("lsmod | grep amdgpu", shell=True)
     if code != 0:
         issues.append("amdgpu kernel module not loaded")
     
@@ -230,20 +230,20 @@ def check_system():
     issues = []
     
     # Memory
-    code, out, _ = run("awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo")
+    code, out, _ = run("awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo", shell=True)
     if out and int(out) < 4096:
         issues.append(f"Available memory critically low: {out}MB")
-    
+
     # Disk
-    code, out, _ = run("df /srv/ai --output=pcent | tail -1 | tr -d ' %'")
+    code, out, _ = run("df /srv/ai --output=pcent | tail -1 | tr -d ' %'", shell=True)
     if out and int(out) > 90:
         issues.append(f"Disk usage at {out}% on /srv/ai")
-    
+
     # CPU governor (should be performance)
-    code, out, _ = run("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")
+    code, out, _ = run(["cat", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"])
     if out != "performance":
         log.info(f"CPU governor is '{out}', setting to performance")
-        run("for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance | tee $c > /dev/null; done")
+        run("for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance | tee $c > /dev/null; done", shell=True)
     
     return issues
 
@@ -257,23 +257,23 @@ def check_updates(state: AgentState):
         if not git_dir.exists():
             continue
         
-        code, _, _ = run(f"cd {path} && git fetch --quiet", timeout=30)
+        code, _, _ = run(["git", "-C", path, "fetch", "--quiet"], timeout=30)
         if code != 0:
             continue
-        
-        code, out, _ = run(f"cd {path} && git rev-list --count HEAD..@{{u}}")
+
+        code, out, _ = run(["git", "-C", path, "rev-list", "--count", "HEAD..@{u}"])
         if out and int(out) > 0:
-            code, hash_out, _ = run(f"cd {path} && git rev-parse --short HEAD")
+            code, hash_out, _ = run(["git", "-C", path, "rev-parse", "--short", "HEAD"])
             updates[name] = {"behind": int(out), "current_commit": hash_out}
     
     # System packages
-    code, out, _ = run("pacman -Qu 2>/dev/null | wc -l")
+    code, out, _ = run("pacman -Qu 2>/dev/null | wc -l", shell=True)
     if out and int(out) > 0:
         updates["system-packages"] = {"count": int(out)}
     
     # Kernel
-    code, running, _ = run("uname -r")
-    code, installed, _ = run("pacman -Q linux 2>/dev/null | awk '{print $2}'")
+    code, running, _ = run(["uname", "-r"])
+    code, installed, _ = run("pacman -Q linux 2>/dev/null | awk '{print $2}'", shell=True)
     if running and installed:
         installed_fmt = installed.replace(".arch", "-arch")
         if running != installed_fmt:
@@ -294,12 +294,11 @@ def check_updates(state: AgentState):
 # ── Inference Verification ─────────────────────────────
 def verify_inference():
     """Quick inference test to ensure LLM is actually working."""
-    code, out, _ = run(
-        'curl -s http://127.0.0.1:8081/v1/chat/completions '
-        '-H "Content-Type: application/json" '
-        '-d \'{"model":"q","messages":[{"role":"user","content":"hi /no_think"}],"max_tokens":5,"temperature":0}\'',
-        timeout=30
-    )
+    code, out, _ = run([
+        "curl", "-s", "http://127.0.0.1:8081/v1/chat/completions",
+        "-H", "Content-Type: application/json",
+        "-d", '{"model":"q","messages":[{"role":"user","content":"hi /no_think"}],"max_tokens":5,"temperature":0}',
+    ], timeout=30)
     if code != 0:
         return False, 0
     
@@ -323,7 +322,7 @@ def auto_update_safe(state: AgentState):
     if sys_pkgs.get("count", 0) > 0:
         log.info(f"Auto-applying {sys_pkgs['count']} system package updates")
         snapshot_before_repair("auto-update system packages")
-        code, out, err = run("pacman -Syu --noconfirm", timeout=300)
+        code, out, err = run(["pacman", "-Syu", "--noconfirm"], timeout=300)
         if code != 0:
             log.error(f"System update failed: {err}")
             notify("Auto-update failed", "pacman -Syu failed — manual intervention needed")
@@ -361,8 +360,8 @@ def rotate_logs():
 # ── Snapshot Cleanup ───────────────────────────────
 def cleanup_old_snapshots():
     """Trigger snapper cleanup if too many snapshots."""
-    run("snapper -c root cleanup number")
-    run("snapper -c home cleanup number")
+    run(["snapper", "-c", "root", "cleanup", "number"])
+    run(["snapper", "-c", "home", "cleanup", "number"])
 
 # ── Main Loop ──────────────────────────────────────────
 def main():

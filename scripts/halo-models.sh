@@ -107,7 +107,7 @@ activate_model() {
     echo "Activating $file..."
     
     # Snapshot before model swap
-    snapper -c root create --type single --cleanup-algorithm number \
+    sudo snapper -c root create --type single --cleanup-algorithm number \
         --description "halo-models activate $name $(date +%Y%m%d-%H%M%S)" 2>/dev/null
     
     # Update service
