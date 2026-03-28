@@ -6,7 +6,7 @@
 
 ### The bare-metal AI stack for AMD Strix Halo
 
-**90 tok/s. Zero containers. 115GB GPU memory. Compiled from source.**
+**109 tok/s. Zero containers. 115GB GPU memory. Compiled from source.**
 
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=flat&logo=archlinux&logoColor=white)](https://archlinux.org)
 [![ROCm](https://img.shields.io/badge/ROCm_7.13-ED1C24?style=flat&logo=amd&logoColor=white)](https://rocm.docs.amd.com)
@@ -60,7 +60,7 @@ All services bind to `127.0.0.1` — access via `https://strixhalo` through the 
 
 | Model | Speed | Size |
 |-------|-------|------|
-| Qwen3-30B-A3B (MoE) | **90 tok/s** | 18 GB |
+| Qwen3-30B-A3B (MoE) | **109 tok/s** | 18 GB |
 | Llama 3 70B | ~18 tok/s | 40 GB |
 | Llama 3 70B Q8 | ~10 tok/s | 70 GB |
 
