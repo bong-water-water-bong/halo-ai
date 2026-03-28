@@ -311,6 +311,10 @@ cmd_help() {
     echo "    fan balanced        Balanced cooling"
     echo "    fan max             Maximum cooling"
     echo ""
+    echo -e "  ${BOLD}Voice${NC}"
+    echo "    listen              Voice to text (SM7B → whisper → text)"
+    echo "    listen --clip       Same but copies each phrase to clipboard"
+    echo ""
     echo -e "  ${BOLD}Security${NC}"
     echo "    password            Change Caddy password"
     echo "    vpn                 WireGuard VPN setup"
@@ -336,6 +340,7 @@ case "${1:-help}" in
     fan)        shift; cmd_fan "$@" ;;
     logs)       shift; cmd_logs "$@" ;;
     bench)      cmd_bench ;;
+    listen)     shift; bash "$(dirname "$0")/../claude/tools/halo-listen.sh" "$@" 2>/dev/null || bash /home/bcloud/claude/tools/halo-listen.sh "$@" ;;
     uninstall)  shift; cmd_uninstall "$@" ;;
     version|-v|--version) cmd_version ;;
     help|-h|--help) cmd_help ;;
