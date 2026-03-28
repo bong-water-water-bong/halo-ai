@@ -1,32 +1,32 @@
 # halo-ai Benchmark Results
 
-**Date**: 2026-03-24  
-**Hardware**: AMD Ryzen AI MAX+ 395 (Strix Halo), 128GB LPDDR5x-8000  
-**Kernel**: 6.19.9-arch1-1  
-**ROCm**: 7.13 (TheRock nightly, gfx1151)  
-**GPU Memory (GTT)**: 115 GB  
+**Date**: 2026-03-27 (updated)
+**Hardware**: AMD Ryzen AI MAX+ 395 (Strix Halo), 128GB LPDDR5x-8000
+**Kernel**: 6.19.9-arch1-1
+**ROCm**: 7.13 (TheRock nightly, gfx1151)
+**GPU Memory (GTT)**: 115 GB
 **Model**: Qwen3-30B-A3B (MoE, Q4_K_M, 18GB)
 
 ## Backend Comparison
 
 | Backend | Gen Speed (200 tok) | Gen Speed (500 tok) | Prompt Speed |
 |---------|:---:|:---:|:---:|
-| **Vulkan (RADV) + Flash Attention** | **90 tok/s** | **90 tok/s** | 58-172 tok/s |
+| **Vulkan (RADV) + Flash Attention** | **109 tok/s** | **109 tok/s** | 58-172 tok/s |
 | HIP (ROCm) + rocWMMA FA | 70.2 tok/s | 68.4 tok/s | 217-302 tok/s |
 
-**Vulkan wins for generation** (~20% faster). HIP wins for prompt processing. Default backend is now Vulkan + Flash Attention.
+**Vulkan wins for generation** (~55% faster). HIP wins for prompt processing. Default backend is now Vulkan + Flash Attention.
 
 ## Inference Performance (Vulkan + FA, default)
 
 | Test | Prompt Tokens | Gen Tokens | Gen Speed | TTFT | Total |
 |------|:---:|:---:|:---:|:---:|:---:|
-| Short Q&A | 12 | 20 | 90 tok/s | <60ms | 0.3s |
-| Technical explanation | 18 | 200 | 90 tok/s | 109ms | 2.5s |
-| Long generation | 20 | 500 | 90 tok/s | 99ms | 6.0s |
+| Short Q&A | 12 | 20 | 109 tok/s | <60ms | 0.2s |
+| Technical explanation | 18 | 200 | 109 tok/s | 109ms | 2.0s |
+| Long generation | 20 | 500 | 109 tok/s | 99ms | 4.8s |
 
 ### Key Metrics
 
-- **Generation**: ~90 tok/s sustained (Vulkan + Flash Attention)
+- **Generation**: ~109 tok/s sustained (Vulkan + Flash Attention)
 - **Time to first token**: <110ms
 - **GPU utilization**: 97% during inference
 - **GPU temperature**: 55°C under sustained load (well within limits)

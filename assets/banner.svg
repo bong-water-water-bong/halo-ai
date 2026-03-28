@@ -46,7 +46,7 @@
   <!-- Stats bar -->
   <g font-family="'Courier New', Courier, monospace" font-size="16" fill="#00d4ff" text-anchor="middle">
     <!-- stat separators -->
-    <text x="488" y="252">89 tok/s</text>
+    <text x="488" y="252">109 tok/s</text>
     <text x="578" y="252" fill="#3d444d" font-size="14">|</text>
     <text x="640" y="252">115GB GPU</text>
     <text x="718" y="252" fill="#3d444d" font-size="14">|</text>

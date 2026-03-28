@@ -403,11 +403,11 @@ step "Downloading AI models"
 # LLM — Qwen3-30B-A3B (best speed/quality for Strix Halo)
 if [ ! -f /srv/ai/models/qwen3-30b-a3b-q4_k_m.gguf ]; then
     info "Downloading Qwen3-30B-A3B (~18GB)..."
-    progress "This is the main LLM — 90 tok/s on Strix Halo"
+    progress "This is the main LLM — 109 tok/s on Strix Halo"
     wget -q --show-progress 'https://huggingface.co/bartowski/Qwen3-30B-A3B-GGUF/resolve/main/Qwen3-30B-A3B-Q4_K_M.gguf' \
         -O /srv/ai/models/qwen3-30b-a3b-q4_k_m.gguf 2>/dev/null || \
         warn "LLM download failed — download manually: halo-models.sh download qwen3-30b"
-    [ -f /srv/ai/models/qwen3-30b-a3b-q4_k_m.gguf ] && ok "Qwen3-30B-A3B ready (18GB, 90 tok/s)"
+    [ -f /srv/ai/models/qwen3-30b-a3b-q4_k_m.gguf ] && ok "Qwen3-30B-A3B ready (18GB, 109 tok/s)"
 else
     ok "LLM model already present"
 fi
@@ -655,7 +655,7 @@ body { background: #0d1117; color: #fff; font-family: system-ui, -apple-system, 
     <a class="card" target="_blank" href="https://github.com/bong-water-water-bong/echo"><h3><span class="dot on"></span>Echo</h3><p>Social media — she speaks for the family</p></a>
 </div>
 <div class="footer">
-    <p>90 tok/s &middot; 115GB GPU &middot; zero containers &middot; <a href="https://github.com/bong-water-water-bong/halo-ai">GitHub</a></p>
+    <p>109 tok/s &middot; 115GB GPU &middot; zero containers &middot; <a href="https://github.com/bong-water-water-bong/halo-ai">GitHub</a></p>
 </div>
 </body>
 </html>

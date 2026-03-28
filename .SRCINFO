@@ -1,5 +1,5 @@
 pkgbase = halo-ai
-	pkgdesc = Bare-metal AI stack for AMD Strix Halo — 90 tok/s, zero containers, 115GB GPU memory
+	pkgdesc = Bare-metal AI stack for AMD Strix Halo — 109 tok/s, zero containers, 115GB GPU memory
 	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/bong-water-water-bong/halo-ai
