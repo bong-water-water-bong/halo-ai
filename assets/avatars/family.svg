@@ -44,12 +44,12 @@
   </g>
 
   <!-- Connector: halo down to meek -->
-  <line x1="405" y1="125" x2="405" y2="170" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <line x1="405" y1="125" x2="250" y2="170" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
 
-  <!-- ROW 2: Meek (center-left) ............... Amp (far right, room to grow) -->
+  <!-- ROW 2: Meek (left) ... Amp (center-right, room to grow right) -->
 
   <!-- Meek -->
-  <g transform="translate(370,170) scale(0.85)">
+  <g transform="translate(215,170) scale(0.85)">
     <path d="M16,30 Q30,14 40,14 Q50,14 64,30 Q50,46 40,46 Q30,46 16,30 Z" fill="none" stroke="#ffffff" stroke-width="2"/>
     <circle cx="40" cy="30" r="8" fill="none" stroke="#ffffff" stroke-width="1.5"/>
     <circle cx="40" cy="30" r="3.5" fill="#ffffff"/>
@@ -57,11 +57,11 @@
     <text x="40" y="72" text-anchor="middle" font-family="monospace" font-size="7" fill="#ffffff" opacity="0.6">security chief</text>
   </g>
 
-  <!-- Connector: meek ........... amp (dotted, room between) -->
-  <line x1="440" y1="200" x2="660" y2="200" stroke="#555d6e" stroke-width="1" stroke-dasharray="3 5" opacity="0.4"/>
+  <!-- Connector: meek ... amp -->
+  <line x1="280" y1="200" x2="420" y2="200" stroke="#555d6e" stroke-width="1" stroke-dasharray="3 5" opacity="0.4"/>
 
-  <!-- Amp (far right, space for future agents between meek and amp) -->
-  <g transform="translate(660,175) scale(0.75)">
+  <!-- Amp (right of meek, whole right side open for future) -->
+  <g transform="translate(420,175) scale(0.75)">
     <rect x="12" y="14" width="40" height="44" rx="6" fill="none" stroke="#ff6f00" stroke-width="2"/>
     <circle cx="32" cy="36" r="10" fill="none" stroke="#ff6f00" stroke-width="1.5"/>
     <circle cx="32" cy="36" r="4" fill="#ff6f00" opacity="0.6"/>
@@ -69,8 +69,8 @@
     <text x="32" y="82" text-anchor="middle" font-family="monospace" font-size="7" fill="#ff6f00" opacity="0.6">audio</text>
   </g>
 
-  <!-- Connector: meek down to reflex row (more dots for spacing) -->
-  <line x1="405" y1="250" x2="405" y2="310" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <!-- Connector: meek down to reflex row -->
+  <line x1="250" y1="250" x2="250" y2="310" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
 
   <!-- Horizontal bar for reflex agents -->
   <line x1="60" y1="310" x2="820" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
