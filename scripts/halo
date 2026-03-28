@@ -1,0 +1,347 @@
+#!/bin/bash
+# halo-ai — designed and built by the architect
+# Unified CLI for the halo-ai stack
+set -euo pipefail
+
+VERSION="1.0.0"
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
+AGENTS_DIR="/srv/ai/gaia/halo-agents"
+FAN_SYSFS="/sys/class/ec_su_axb35"
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'
+CYAN='\033[0;36m'; MAGENTA='\033[0;35m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
+
+# ── Status ────────────────────────────────────────────
+cmd_status() {
+    echo ""
+    echo -e "${CYAN}${BOLD}  halo-ai status${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+    # Inference test
+    local tok_s="offline"
+    local model="unknown"
+    local inf_color="${RED}"
+    local result
+    result=$(curl -s --connect-timeout 3 http://127.0.0.1:8081/v1/chat/completions \
+        -H 'Content-Type: application/json' \
+        -d '{"model":"q","messages":[{"role":"user","content":"hi /no_think"}],"max_tokens":5,"temperature":0}' 2>/dev/null) || true
+    if [ -n "$result" ] && echo "$result" | grep -q "choices"; then
+        tok_s=$(echo "$result" | python3 -c "import json,sys; print(f'{json.load(sys.stdin)[\"timings\"][\"predicted_per_second\"]:.1f}')" 2>/dev/null || echo "?")
+        model=$(grep -oP '--model\s+\K\S+' /etc/systemd/system/halo-llama-server.service 2>/dev/null | xargs basename 2>/dev/null | sed 's/\.gguf//' || echo "?")
+        inf_color="${GREEN}"
+    fi
+    printf "  ${inf_color}%-14s${NC} %-16s %-22s %s\n" "Inference" "${tok_s} tok/s" "$model" "$([ "$tok_s" != "offline" ] && echo '✓' || echo '✗')"
+
+    # GPU backend
+    local backend=$(grep -oP 'build-\K[a-z]+' /etc/systemd/system/halo-llama-server.service 2>/dev/null || echo "?")
+    printf "  %-14s %-16s\n" "Backend" "$backend"
+
+    # GPU temp
+    local gpu_temp="?"
+    for hwmon in /sys/class/hwmon/hwmon*; do
+        [ -f "$hwmon/name" ] && grep -q "amdgpu" "$hwmon/name" 2>/dev/null && gpu_temp=$(($(cat "$hwmon/temp1_input" 2>/dev/null || echo 0) / 1000)) && break
+    done
+    local temp_color="${GREEN}"
+    [ "$gpu_temp" != "?" ] && [ "$gpu_temp" -gt 80 ] && temp_color="${RED}"
+    [ "$gpu_temp" != "?" ] && [ "$gpu_temp" -gt 60 ] && [ "$gpu_temp" -le 80 ] && temp_color="${YELLOW}"
+    printf "  ${temp_color}%-14s${NC} %-16s\n" "GPU" "${gpu_temp}°C"
+
+    # Memory
+    local mem_total=$(awk '/MemTotal/ {printf "%.0f", $2/1048576}' /proc/meminfo)
+    local mem_avail=$(awk '/MemAvailable/ {printf "%.0f", $2/1048576}' /proc/meminfo)
+    local mem_used=$((mem_total - mem_avail))
+    local mem_pct=$((mem_used * 100 / mem_total))
+    local mem_color="${GREEN}"
+    [ "$mem_pct" -gt 80 ] && mem_color="${RED}"
+    [ "$mem_pct" -gt 60 ] && [ "$mem_pct" -le 80 ] && mem_color="${YELLOW}"
+    printf "  ${mem_color}%-14s${NC} %-16s %s\n" "Memory" "${mem_used}/${mem_total} GB" "(${mem_pct}% used)"
+
+    # Disk
+    local disk_pct=$(df /srv/ai --output=pcent 2>/dev/null | tail -1 | tr -d ' %')
+    local disk_color="${GREEN}"
+    [ -n "$disk_pct" ] && [ "$disk_pct" -gt 90 ] && disk_color="${RED}"
+    [ -n "$disk_pct" ] && [ "$disk_pct" -gt 70 ] && [ "$disk_pct" -le 90 ] && disk_color="${YELLOW}"
+    printf "  ${disk_color}%-14s${NC} %-16s\n" "Disk" "${disk_pct:-?}% /srv/ai"
+
+    # Uptime
+    local uptime=$(uptime -p 2>/dev/null | sed 's/up //')
+    printf "  %-14s %-16s\n" "Uptime" "$uptime"
+
+    echo ""
+
+    # Services
+    local svc_up=0 svc_total=0 svc_list_ok="" svc_list_fail=""
+    for svc in halo-llama-server halo-lemonade halo-open-webui halo-vane halo-searxng halo-qdrant halo-n8n halo-comfyui halo-caddy halo-agent halo-whisper-server halo-gaia-api halo-gaia-mcp; do
+        svc_total=$((svc_total + 1))
+        local short=$(echo "$svc" | sed 's/halo-//')
+        if systemctl is-active --quiet "$svc" 2>/dev/null; then
+            svc_up=$((svc_up + 1))
+            svc_list_ok="$svc_list_ok $short"
+        else
+            svc_list_fail="$svc_list_fail $short"
+        fi
+    done
+    local svc_color="${GREEN}"
+    [ "$svc_up" -lt "$svc_total" ] && svc_color="${YELLOW}"
+    printf "  ${svc_color}%-14s${NC} %s\n" "Services" "${svc_up}/${svc_total} active"
+    [ -n "$svc_list_ok" ] && echo -e "    ${GREEN}✓${NC}${svc_list_ok}"
+    [ -n "$svc_list_fail" ] && echo -e "    ${RED}✗${NC}${svc_list_fail}"
+
+    echo ""
+
+    # Agents
+    local agent_up=0 agent_total=0 agent_list_ok="" agent_list_fail=""
+    for agent in halo echo meek amp bounty pulse ghost gate shadow fang mirror vault net shield; do
+        agent_total=$((agent_total + 1))
+        if systemctl is-active --quiet "halo-${agent}" 2>/dev/null; then
+            agent_up=$((agent_up + 1))
+            agent_list_ok="$agent_list_ok $agent"
+        else
+            agent_list_fail="$agent_list_fail $agent"
+        fi
+    done
+    local agent_color="${GREEN}"
+    [ "$agent_up" -lt "$agent_total" ] && agent_color="${YELLOW}"
+    printf "  ${agent_color}%-14s${NC} %s\n" "Agents" "${agent_up}/${agent_total} active"
+    [ -n "$agent_list_ok" ] && echo -e "    ${GREEN}✓${NC}${agent_list_ok}"
+    [ -n "$agent_list_fail" ] && echo -e "    ${RED}✗${NC}${agent_list_fail}"
+
+    echo ""
+
+    # Fan (if available)
+    if [ -d "$FAN_SYSFS/fan1" ]; then
+        local f1=$(cat "$FAN_SYSFS/fan1/rpm" 2>/dev/null || echo "?")
+        local f2=$(cat "$FAN_SYSFS/fan2/rpm" 2>/dev/null || echo "?")
+        local f3=$(cat "$FAN_SYSFS/fan3/rpm" 2>/dev/null || echo "?")
+        local fan_label="silent"
+        [ "$f1" != "0" ] && fan_label="active"
+        printf "  %-14s %s\n" "Fan" "${fan_label} (${f1}/${f2}/${f3} rpm)"
+    fi
+
+    # Updates
+    local pkg_updates=$(pacman -Qu 2>/dev/null | wc -l)
+    [ "$pkg_updates" -gt 0 ] && printf "  ${YELLOW}%-14s${NC} %s\n" "Updates" "${pkg_updates} packages available"
+
+    # Last backup
+    local last_backup=$(ls -dt /srv/ai/backups/*/ 2>/dev/null | head -1)
+    if [ -n "$last_backup" ]; then
+        local backup_age=$(( ($(date +%s) - $(stat -c %Y "$last_backup")) / 3600 ))
+        local backup_color="${GREEN}"
+        [ "$backup_age" -gt 48 ] && backup_color="${RED}"
+        printf "  ${backup_color}%-14s${NC} %s\n" "Backup" "${backup_age}h ago"
+    fi
+
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+}
+
+# ── Services ──────────────────────────────────────────
+cmd_services() {
+    echo ""
+    echo -e "${CYAN}${BOLD}  halo-ai services${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    for svc in halo-llama-server halo-lemonade halo-open-webui halo-vane halo-searxng halo-qdrant halo-n8n halo-comfyui halo-caddy halo-agent halo-whisper-server halo-gaia-api halo-gaia-mcp halo-dashboard-api halo-dashboard-ui; do
+        local status=$(systemctl is-active "$svc" 2>/dev/null || echo "not found")
+        local color="${DIM}"
+        case "$status" in
+            active) color="${GREEN}" ;;
+            failed|inactive) color="${RED}" ;;
+            activating) color="${YELLOW}" ;;
+        esac
+        printf "  ${color}%-30s %s${NC}\n" "$svc" "$status"
+    done
+    echo ""
+}
+
+# ── Agents ────────────────────────────────────────────
+cmd_agents() {
+    local action="${1:-status}"
+    shift 2>/dev/null || true
+    if [ -x "$AGENTS_DIR/manage.sh" ]; then
+        bash "$AGENTS_DIR/manage.sh" "$action" "$@"
+    else
+        echo "Agent manager not found at $AGENTS_DIR/manage.sh"
+        exit 1
+    fi
+}
+
+# ── Models ────────────────────────────────────────────
+cmd_models() {
+    local action="${1:-list}"
+    shift 2>/dev/null || true
+    bash "$SCRIPTS_DIR/halo-models.sh" "$action" "$@"
+}
+
+# ── Driver ────────────────────────────────────────────
+cmd_driver() {
+    local backend="${1:-status}"
+    bash "$SCRIPTS_DIR/halo-driver-swap.sh" "$backend"
+}
+
+# ── Freeze / Thaw ────────────────────────────────────
+cmd_freeze() { bash "$SCRIPTS_DIR/halo-freeze.sh"; }
+cmd_thaw()   { bash "$SCRIPTS_DIR/halo-thaw.sh" "${1:-}"; }
+
+# ── Update ────────────────────────────────────────────
+cmd_update() { bash "$SCRIPTS_DIR/halo-update.sh" "${1:-update}"; }
+
+# ── Backup ────────────────────────────────────────────
+cmd_backup() { bash "$SCRIPTS_DIR/halo-backup.sh" "${1:-}"; }
+
+# ── Password ──────────────────────────────────────────
+cmd_password() { bash "$SCRIPTS_DIR/halo-change-password.sh"; }
+
+# ── VPN ───────────────────────────────────────────────
+cmd_vpn() { bash "$SCRIPTS_DIR/halo-vpn-setup.sh" "$@"; }
+
+# ── Fan ───────────────────────────────────────────────
+cmd_fan() {
+    local mode="${1:-status}"
+    case "$mode" in
+        quiet)
+            echo "Setting quiet fan curve..."
+            echo "70,78,85,92,97" | sudo tee "$FAN_SYSFS/fan1/rampup_curve" > /dev/null
+            echo "55,65,75,85,92" | sudo tee "$FAN_SYSFS/fan1/rampdown_curve" > /dev/null
+            echo "70,78,85,92,97" | sudo tee "$FAN_SYSFS/fan2/rampup_curve" > /dev/null
+            echo "55,65,75,85,92" | sudo tee "$FAN_SYSFS/fan2/rampdown_curve" > /dev/null
+            echo "72,80,87,93,97" | sudo tee "$FAN_SYSFS/fan3/rampup_curve" > /dev/null
+            echo "50,60,72,85,92" | sudo tee "$FAN_SYSFS/fan3/rampdown_curve" > /dev/null
+            echo -e "${GREEN}Quiet mode set${NC}"
+            ;;
+        balanced)
+            echo "Setting balanced fan curve..."
+            echo "55,65,78,90,95" | sudo tee "$FAN_SYSFS/fan1/rampup_curve" > /dev/null
+            echo "40,55,70,85,92" | sudo tee "$FAN_SYSFS/fan1/rampdown_curve" > /dev/null
+            echo "55,65,78,90,95" | sudo tee "$FAN_SYSFS/fan2/rampup_curve" > /dev/null
+            echo "40,55,70,85,92" | sudo tee "$FAN_SYSFS/fan2/rampdown_curve" > /dev/null
+            echo "50,60,75,88,95" | sudo tee "$FAN_SYSFS/fan3/rampup_curve" > /dev/null
+            echo "35,50,65,82,92" | sudo tee "$FAN_SYSFS/fan3/rampdown_curve" > /dev/null
+            echo -e "${GREEN}Balanced mode set${NC}"
+            ;;
+        max)
+            echo "Setting max fan speed..."
+            for f in fan1 fan2 fan3; do
+                echo "curve" | sudo tee "$FAN_SYSFS/$f/mode" > /dev/null
+                echo "20,30,40,50,60" | sudo tee "$FAN_SYSFS/$f/rampup_curve" > /dev/null
+            done
+            echo -e "${GREEN}Max cooling set${NC}"
+            ;;
+        status|*)
+            if [ -d "$FAN_SYSFS/fan1" ]; then
+                echo -e "${CYAN}Fan status:${NC}"
+                local temp=$(cat "$FAN_SYSFS/temp1/temp" 2>/dev/null || echo "?")
+                echo "  Temp:  ${temp}°C"
+                echo "  Fan1:  $(cat "$FAN_SYSFS/fan1/rpm" 2>/dev/null) rpm (level $(cat "$FAN_SYSFS/fan1/level" 2>/dev/null))"
+                echo "  Fan2:  $(cat "$FAN_SYSFS/fan2/rpm" 2>/dev/null) rpm (level $(cat "$FAN_SYSFS/fan2/level" 2>/dev/null))"
+                echo "  Fan3:  $(cat "$FAN_SYSFS/fan3/rpm" 2>/dev/null) rpm (level $(cat "$FAN_SYSFS/fan3/level" 2>/dev/null))"
+                echo "  Curve: $(cat "$FAN_SYSFS/fan1/rampup_curve" 2>/dev/null)"
+            else
+                echo "Fan control not available (ec_su_axb35 module not loaded)"
+            fi
+            ;;
+    esac
+}
+
+# ── Logs ──────────────────────────────────────────────
+cmd_logs() {
+    local target="${1:-halo-agent}"
+    if [[ "$target" != halo-* ]]; then
+        target="halo-${target}"
+    fi
+    journalctl -u "$target" -f --no-pager
+}
+
+# ── Bench ─────────────────────────────────────────────
+cmd_bench() { bash "$SCRIPTS_DIR/halo-driver-swap.sh" bench; }
+
+# ── Uninstall ─────────────────────────────────────────
+cmd_uninstall() { bash "$SCRIPTS_DIR/halo-uninstall.sh" "$@"; }
+
+# ── Version ───────────────────────────────────────────
+cmd_version() {
+    echo -e "${CYAN}${BOLD}halo-ai${NC} v${VERSION}"
+    echo -e "${DIM}designed and built by the architect${NC}"
+    echo ""
+    echo "  Kernel:  $(uname -r)"
+    echo "  GPU:     $(cat /sys/class/drm/card*/device/hwmon/hwmon*/name 2>/dev/null | head -1 || echo '?')"
+    local model=$(grep -oP '--model\s+\K\S+' /etc/systemd/system/halo-llama-server.service 2>/dev/null | xargs basename 2>/dev/null | sed 's/\.gguf//' || echo "?")
+    echo "  Model:   $model"
+    echo "  Python:  $(/opt/python3.13/bin/python3.13 --version 2>/dev/null || python3 --version 2>/dev/null)"
+    echo "  Node:    $(node --version 2>/dev/null || echo 'not installed')"
+    echo ""
+}
+
+# ── Help ──────────────────────────────────────────────
+cmd_help() {
+    echo ""
+    echo -e "${CYAN}${BOLD}  halo-ai${NC} — unified CLI for the bare-metal AI stack"
+    echo -e "${DIM}  designed and built by the architect${NC}"
+    echo ""
+    echo -e "  ${BOLD}Usage:${NC} halo <command> [args]"
+    echo ""
+    echo -e "  ${BOLD}System${NC}"
+    echo "    status              Full system overview"
+    echo "    services            All service statuses"
+    echo "    logs <service>      Tail service logs"
+    echo "    version             Stack version info"
+    echo ""
+    echo -e "  ${BOLD}Agents${NC}"
+    echo "    agents              Show all 14 agents"
+    echo "    agents install <n>  Add an agent (or 'all')"
+    echo "    agents remove <n>   Remove an agent (or 'all')"
+    echo ""
+    echo -e "  ${BOLD}Models${NC}"
+    echo "    models              List available models"
+    echo "    models download <n> Download a model"
+    echo "    models use <n>      Switch active model"
+    echo ""
+    echo -e "  ${BOLD}GPU${NC}"
+    echo "    driver <backend>    Switch backend (vulkan/hip/opencl)"
+    echo "    bench               Quick benchmark"
+    echo ""
+    echo -e "  ${BOLD}Stack${NC}"
+    echo "    freeze              Snapshot the stack"
+    echo "    thaw [timestamp]    Restore from snapshot"
+    echo "    update              Safe update with rollback"
+    echo "    backup              Run backup now"
+    echo ""
+    echo -e "  ${BOLD}Hardware${NC}"
+    echo "    fan                 Fan status"
+    echo "    fan quiet           Silent mode (fans off until 70°C)"
+    echo "    fan balanced        Balanced cooling"
+    echo "    fan max             Maximum cooling"
+    echo ""
+    echo -e "  ${BOLD}Security${NC}"
+    echo "    password            Change Caddy password"
+    echo "    vpn                 WireGuard VPN setup"
+    echo ""
+    echo -e "  ${BOLD}Maintenance${NC}"
+    echo "    uninstall           Remove halo-ai"
+    echo ""
+}
+
+# ── Main dispatch ─────────────────────────────────────
+case "${1:-help}" in
+    status)     cmd_status ;;
+    services)   cmd_services ;;
+    agents)     shift; cmd_agents "$@" ;;
+    models)     shift; cmd_models "$@" ;;
+    driver)     shift; cmd_driver "$@" ;;
+    freeze)     cmd_freeze ;;
+    thaw)       shift; cmd_thaw "$@" ;;
+    update)     shift; cmd_update "$@" ;;
+    backup)     shift; cmd_backup "$@" ;;
+    password)   cmd_password ;;
+    vpn)        shift; cmd_vpn "$@" ;;
+    fan)        shift; cmd_fan "$@" ;;
+    logs)       shift; cmd_logs "$@" ;;
+    bench)      cmd_bench ;;
+    uninstall)  shift; cmd_uninstall "$@" ;;
+    version|-v|--version) cmd_version ;;
+    help|-h|--help) cmd_help ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        echo "Run 'halo help' for usage."
+        exit 1
+        ;;
+esac
