@@ -1,172 +1,129 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520">
   <rect width="900" height="520" rx="16" fill="#0d1117"/>
 
-  <!-- Title -->
-  <text x="450" y="30" text-anchor="middle" font-family="monospace" font-size="13" fill="#8b949e" letter-spacing="4" font-weight="bold">THE HALO-AI FAMILY</text>
+  <!-- ═══ ROW 1: Core Family ═══ -->
+  <!-- Bounty -->
+  <text x="180" y="55" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#e040fb">bounty</text>
+  <text x="180" y="70" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">bug hunter</text>
 
-  <!-- ROW 1: Bounty, Halo, Echo -->
+  <line x1="230" y1="50" x2="330" y2="50" stroke="#30363d" stroke-width="1"/>
 
-  <!-- Bounty (left) -->
-  <g transform="translate(160,50) scale(0.7)">
-    <circle cx="32" cy="20" r="14" fill="none" stroke="#e040fb" stroke-width="2"/>
-    <path d="M20,20 L32,10 L44,20 L32,30 Z" fill="none" stroke="#e040fb" stroke-width="1.5"/>
-    <line x1="32" y1="36" x2="32" y2="52" stroke="#e040fb" stroke-width="1.5"/>
-    <line x1="20" y1="44" x2="44" y2="44" stroke="#e040fb" stroke-width="1.5"/>
-    <text x="32" y="68" text-anchor="middle" font-family="monospace" font-size="9" fill="#e040fb" font-weight="bold">bounty</text>
-    <text x="32" y="78" text-anchor="middle" font-family="monospace" font-size="7" fill="#e040fb" opacity="0.6">bug hunter</text>
-  </g>
+  <!-- Halo -->
+  <text x="400" y="35" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#00d4ff">halo</text>
+  <text x="400" y="52" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">orchestrator</text>
 
-  <!-- Connector: bounty .... halo -->
-  <line x1="215" y1="78" x2="350" y2="78" stroke="#555d6e" stroke-width="1" stroke-dasharray="3 5" opacity="0.5"/>
-  <text x="283" y="72" text-anchor="middle" font-family="monospace" font-size="6" fill="#555d6e">brothers</text>
-
-  <!-- Halo (center) -->
-  <g transform="translate(350,45) scale(0.85)">
-    <circle cx="40" cy="30" r="18" fill="none" stroke="#00d4ff" stroke-width="2" stroke-dasharray="4 2"/>
-    <rect x="28" y="30" width="24" height="30" rx="3" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
-    <circle cx="33" cy="38" r="1.2" fill="#00d4ff"/>
-    <circle cx="33" cy="45" r="1.2" fill="#00ff88"/>
-    <text x="40" y="78" text-anchor="middle" font-family="monospace" font-size="9" fill="#00d4ff" font-weight="bold">halo</text>
-    <text x="40" y="88" text-anchor="middle" font-family="monospace" font-size="7" fill="#00d4ff" opacity="0.6">the stack</text>
-  </g>
-
-  <!-- Connector: halo to echo -->
-  <line x1="420" y1="78" x2="490" y2="78" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <line x1="470" y1="42" x2="570" y2="42" stroke="#30363d" stroke-width="1"/>
 
   <!-- Echo -->
-  <g transform="translate(490,45) scale(0.85)">
-    <path d="M20,40 Q30,20 40,20 Q50,20 60,40" fill="none" stroke="#ce93d8" stroke-width="1.5" opacity="0.5"/>
-    <path d="M14,40 Q28,12 40,12 Q52,12 66,40" fill="none" stroke="#ce93d8" stroke-width="1.5" opacity="0.3"/>
-    <polygon points="30,36 30,48 40,52 40,32" fill="#ce93d8" opacity="0.8"/>
-    <path d="M40,30 L54,22 L54,58 L40,50" fill="none" stroke="#ce93d8" stroke-width="1.5"/>
-    <text x="40" y="78" text-anchor="middle" font-family="monospace" font-size="9" fill="#ce93d8" font-weight="bold">echo</text>
-    <text x="40" y="88" text-anchor="middle" font-family="monospace" font-size="7" fill="#ce93d8" opacity="0.6">social media</text>
-  </g>
+  <text x="640" y="45" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#ce93d8">echo</text>
+  <text x="640" y="60" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">social media</text>
 
-  <!-- Connector: halo down, splits to meek (left) and amp (right) -->
-  <line x1="385" y1="125" x2="385" y2="155" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
-  <!-- Horizontal split bar -->
-  <line x1="220" y1="155" x2="620" y2="155" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
-  <!-- Down to meek -->
-  <line x1="220" y1="155" x2="220" y2="175" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
-  <!-- Down to amp -->
-  <line x1="620" y1="155" x2="620" y2="175" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+  <!-- Connector down from halo -->
+  <line x1="400" y1="60" x2="400" y2="95" stroke="#30363d" stroke-width="1"/>
 
-  <!-- ROW 2: Meek (left) and Amp (right) -->
-
-  <!-- Meek -->
-  <g transform="translate(185,175) scale(0.85)">
-    <path d="M16,30 Q30,14 40,14 Q50,14 64,30 Q50,46 40,46 Q30,46 16,30 Z" fill="none" stroke="#ffffff" stroke-width="2"/>
-    <circle cx="40" cy="30" r="8" fill="none" stroke="#ffffff" stroke-width="1.5"/>
-    <circle cx="40" cy="30" r="3.5" fill="#ffffff"/>
-    <text x="40" y="62" text-anchor="middle" font-family="monospace" font-size="9" fill="#ffffff" font-weight="bold">meek</text>
-    <text x="40" y="72" text-anchor="middle" font-family="monospace" font-size="7" fill="#ffffff" opacity="0.6">security chief</text>
-  </g>
+  <!-- ═══ ROW 2: The Brothers ═══ -->
+  <line x1="300" y1="95" x2="500" y2="95" stroke="#30363d" stroke-width="1"/>
 
   <!-- Amp -->
-  <g transform="translate(590,175) scale(0.75)">
-    <rect x="12" y="14" width="40" height="44" rx="6" fill="none" stroke="#ff6f00" stroke-width="2"/>
-    <circle cx="32" cy="36" r="10" fill="none" stroke="#ff6f00" stroke-width="1.5"/>
-    <circle cx="32" cy="36" r="4" fill="#ff6f00" opacity="0.6"/>
-    <text x="32" y="72" text-anchor="middle" font-family="monospace" font-size="9" fill="#ff6f00" font-weight="bold">amp</text>
-    <text x="32" y="82" text-anchor="middle" font-family="monospace" font-size="7" fill="#ff6f00" opacity="0.6">audio</text>
+  <line x1="300" y1="95" x2="300" y2="110" stroke="#30363d" stroke-width="1"/>
+  <text x="300" y="128" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#ff6f00">amp</text>
+  <text x="300" y="143" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">audio engineer</text>
+
+  <!-- Meek -->
+  <line x1="500" y1="95" x2="500" y2="110" stroke="#30363d" stroke-width="1"/>
+  <text x="500" y="128" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#ffffff">meek</text>
+  <text x="500" y="143" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">security chief</text>
+
+  <!-- Connector down from meek to reflex box -->
+  <line x1="500" y1="150" x2="500" y2="180" stroke="#30363d" stroke-width="1"/>
+
+  <!-- ═══ REFLEX GROUP — boxed platoon ═══ -->
+  <rect x="40" y="180" width="820" height="240" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="450" y="205" text-anchor="middle" font-family="monospace" font-size="10" fill="#30363d" letter-spacing="3">REFLEX GROUP</text>
+
+  <!-- Row 1: 5 agents -->
+  <g>
+    <!-- Pulse -->
+    <rect x="70" y="220" width="130" height="56" rx="6" fill="#161b22" stroke="#00ff88" stroke-width="1"/>
+    <circle cx="88" cy="248" r="4" fill="#00ff88"/>
+    <text x="105" y="244" font-family="monospace" font-size="10" font-weight="bold" fill="#00ff88">pulse</text>
+    <text x="105" y="260" font-family="monospace" font-size="8" fill="#555">health</text>
+
+    <!-- Ghost -->
+    <rect x="220" y="220" width="130" height="56" rx="6" fill="#161b22" stroke="#b388ff" stroke-width="1"/>
+    <circle cx="238" cy="248" r="4" fill="#b388ff"/>
+    <text x="255" y="244" font-family="monospace" font-size="10" font-weight="bold" fill="#b388ff">ghost</text>
+    <text x="255" y="260" font-family="monospace" font-size="8" fill="#555">secrets</text>
+
+    <!-- Gate -->
+    <rect x="370" y="220" width="130" height="56" rx="6" fill="#161b22" stroke="#00d4ff" stroke-width="1"/>
+    <circle cx="388" cy="248" r="4" fill="#00d4ff"/>
+    <text x="405" y="244" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff">gate</text>
+    <text x="405" y="260" font-family="monospace" font-size="8" fill="#555">firewall</text>
+
+    <!-- Shadow -->
+    <rect x="520" y="220" width="130" height="56" rx="6" fill="#161b22" stroke="#ff9800" stroke-width="1"/>
+    <circle cx="538" cy="248" r="4" fill="#ff9800"/>
+    <text x="555" y="244" font-family="monospace" font-size="10" font-weight="bold" fill="#ff9800">shadow</text>
+    <text x="555" y="260" font-family="monospace" font-size="8" fill="#555">integrity</text>
+
+    <!-- Fang -->
+    <rect x="670" y="220" width="130" height="56" rx="6" fill="#161b22" stroke="#ff4444" stroke-width="1"/>
+    <circle cx="688" cy="248" r="4" fill="#ff4444"/>
+    <text x="705" y="244" font-family="monospace" font-size="10" font-weight="bold" fill="#ff4444">fang</text>
+    <text x="705" y="260" font-family="monospace" font-size="8" fill="#555">intrusion</text>
   </g>
 
-  <!-- Connector: meek down to reflex -->
-  <line x1="220" y1="255" x2="220" y2="290" stroke="#555d6e" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <!-- Row 2: 4 agents -->
+  <g>
+    <!-- Mirror -->
+    <rect x="145" y="296" width="130" height="56" rx="6" fill="#161b22" stroke="#448aff" stroke-width="1"/>
+    <circle cx="163" cy="324" r="4" fill="#448aff"/>
+    <text x="180" y="320" font-family="monospace" font-size="10" font-weight="bold" fill="#448aff">mirror</text>
+    <text x="180" y="336" font-family="monospace" font-size="8" fill="#555">pii scan</text>
 
-  <!-- Connector: amp down to future crew (placeholder) -->
-  <line x1="620" y1="250" x2="620" y2="290" stroke="#555d6e" stroke-width="1" stroke-dasharray="3 6" opacity="0.3"/>
+    <!-- Vault -->
+    <rect x="295" y="296" width="130" height="56" rx="6" fill="#161b22" stroke="#ffd740" stroke-width="1"/>
+    <circle cx="313" cy="324" r="4" fill="#ffd740"/>
+    <text x="330" y="320" font-family="monospace" font-size="10" font-weight="bold" fill="#ffd740">vault</text>
+    <text x="330" y="336" font-family="monospace" font-size="8" fill="#555">backup</text>
 
-  <!-- LEFT COLUMN: Meek's Reflex agents -->
-  <line x1="30" y1="290" x2="430" y2="290" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
+    <!-- Net -->
+    <rect x="445" y="296" width="130" height="56" rx="6" fill="#161b22" stroke="#00bfa5" stroke-width="1"/>
+    <circle cx="463" cy="324" r="4" fill="#00bfa5"/>
+    <text x="480" y="320" font-family="monospace" font-size="10" font-weight="bold" fill="#00bfa5">net</text>
+    <text x="480" y="336" font-family="monospace" font-size="8" fill="#555">network</text>
 
-  <!-- Pulse -->
-  <line x1="40" y1="290" x2="40" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(8,310) scale(0.65)">
-    <polyline points="8,32 18,32 22,32 25,20 28,44 31,16 34,42 37,28 40,32 56,32"
-      fill="none" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"/>
-    <text x="32" y="54" text-anchor="middle" font-family="monospace" font-size="9" fill="#00ff88" font-weight="bold">pulse</text>
-    <text x="32" y="63" text-anchor="middle" font-family="monospace" font-size="6" fill="#00ff88" opacity="0.5">health</text>
+    <!-- Shield -->
+    <rect x="595" y="296" width="130" height="56" rx="6" fill="#161b22" stroke="#78909c" stroke-width="1"/>
+    <circle cx="613" cy="324" r="4" fill="#78909c"/>
+    <text x="630" y="320" font-family="monospace" font-size="10" font-weight="bold" fill="#78909c">shield</text>
+    <text x="630" y="336" font-family="monospace" font-size="8" fill="#555">protection</text>
   </g>
 
-  <!-- Ghost -->
-  <line x1="85" y1="290" x2="85" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(53,310) scale(0.65)">
-    <circle cx="32" cy="26" r="12" fill="none" stroke="#b388ff" stroke-width="2"/>
-    <rect x="28" y="36" width="8" height="14" rx="1.5" fill="none" stroke="#b388ff" stroke-width="2"/>
-    <text x="32" y="62" text-anchor="middle" font-family="monospace" font-size="9" fill="#b388ff" font-weight="bold">ghost</text>
-    <text x="32" y="71" text-anchor="middle" font-family="monospace" font-size="6" fill="#b388ff" opacity="0.5">secrets</text>
+  <!-- ═══ ROW 3: Other agents ═══ -->
+  <g>
+    <rect x="70" y="440" width="130" height="50" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+    <text x="135" y="464" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#4fc3f7">sentinel</text>
+    <text x="135" y="478" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">code watcher</text>
+
+    <rect x="220" y="440" width="130" height="50" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+    <text x="285" y="464" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#aed581">mechanic</text>
+    <text x="285" y="478" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">bug fixer</text>
+
+    <rect x="370" y="440" width="130" height="50" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+    <text x="435" y="464" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#ffab40">crypto</text>
+    <text x="435" y="478" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">arbitrage</text>
+
+    <rect x="520" y="440" width="130" height="50" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+    <text x="585" y="464" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#e6ee9c">conductor</text>
+    <text x="585" y="478" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">ai composer</text>
+
+    <rect x="670" y="440" width="130" height="50" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+    <text x="735" y="464" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#ef5350">forge</text>
+    <text x="735" y="478" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">game builder</text>
   </g>
 
-  <!-- Gate -->
-  <line x1="130" y1="290" x2="130" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(98,310) scale(0.65)">
-    <polygon points="32,10 52,22 52,42 32,54 12,42 12,22" fill="none" stroke="#00d4ff" stroke-width="2"/>
-    <rect x="26" y="28" width="12" height="10" rx="2" fill="#00d4ff"/>
-    <text x="32" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#00d4ff" font-weight="bold">gate</text>
-    <text x="32" y="79" text-anchor="middle" font-family="monospace" font-size="6" fill="#00d4ff" opacity="0.5">firewall</text>
-  </g>
-
-  <!-- Shadow -->
-  <line x1="175" y1="290" x2="175" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(143,310) scale(0.65)">
-    <path d="M32,18 Q48,18 48,32 Q48,46 32,46" fill="none" stroke="#ff9800" stroke-width="2"/>
-    <path d="M32,24 Q42,24 42,32 Q42,40 32,40" fill="none" stroke="#ff9800" stroke-width="2" opacity="0.6"/>
-    <text x="32" y="60" text-anchor="middle" font-family="monospace" font-size="9" fill="#ff9800" font-weight="bold">shadow</text>
-    <text x="32" y="69" text-anchor="middle" font-family="monospace" font-size="6" fill="#ff9800" opacity="0.5">integrity</text>
-  </g>
-
-  <!-- Fang -->
-  <line x1="225" y1="290" x2="225" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(193,310) scale(0.65)">
-    <polygon points="24,12 32,36 16,36" fill="#ff4444"/>
-    <polygon points="40,12 48,36 32,36" fill="#ff4444"/>
-    <line x1="12" y1="36" x2="52" y2="36" stroke="#ff4444" stroke-width="2"/>
-    <text x="32" y="56" text-anchor="middle" font-family="monospace" font-size="9" fill="#ff4444" font-weight="bold">fang</text>
-    <text x="32" y="65" text-anchor="middle" font-family="monospace" font-size="6" fill="#ff4444" opacity="0.5">intrusion</text>
-  </g>
-
-  <!-- Mirror -->
-  <line x1="270" y1="290" x2="270" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(238,310) scale(0.65)">
-    <circle cx="28" cy="28" r="14" fill="none" stroke="#448aff" stroke-width="2"/>
-    <line x1="38" y1="38" x2="52" y2="52" stroke="#448aff" stroke-width="2.5" stroke-linecap="round"/>
-    <text x="32" y="66" text-anchor="middle" font-family="monospace" font-size="9" fill="#448aff" font-weight="bold">mirror</text>
-    <text x="32" y="75" text-anchor="middle" font-family="monospace" font-size="6" fill="#448aff" opacity="0.5">PII scan</text>
-  </g>
-
-  <!-- Vault -->
-  <line x1="320" y1="290" x2="320" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(288,310) scale(0.65)">
-    <circle cx="32" cy="26" r="16" fill="none" stroke="#ffd740" stroke-width="2"/>
-    <circle cx="32" cy="26" r="6" fill="none" stroke="#ffd740" stroke-width="1.5"/>
-    <text x="32" y="62" text-anchor="middle" font-family="monospace" font-size="9" fill="#ffd740" font-weight="bold">vault</text>
-    <text x="32" y="71" text-anchor="middle" font-family="monospace" font-size="6" fill="#ffd740" opacity="0.5">backup</text>
-  </g>
-
-  <!-- Net -->
-  <line x1="370" y1="290" x2="370" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(338,310) scale(0.65)">
-    <circle cx="32" cy="16" r="4" fill="#00bfa5"/>
-    <circle cx="18" cy="34" r="3.5" fill="#00bfa5" opacity="0.7"/>
-    <circle cx="46" cy="34" r="3.5" fill="#00bfa5" opacity="0.7"/>
-    <line x1="32" y1="20" x2="18" y2="31" stroke="#00bfa5" stroke-width="1.2" opacity="0.5"/>
-    <line x1="32" y1="20" x2="46" y2="31" stroke="#00bfa5" stroke-width="1.2" opacity="0.5"/>
-    <text x="32" y="55" text-anchor="middle" font-family="monospace" font-size="9" fill="#00bfa5" font-weight="bold">net</text>
-    <text x="32" y="64" text-anchor="middle" font-family="monospace" font-size="6" fill="#00bfa5" opacity="0.5">network</text>
-  </g>
-
-  <!-- Shield -->
-  <line x1="420" y1="290" x2="420" y2="310" stroke="#555d6e" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <g transform="translate(388,310) scale(0.65)">
-    <path d="M32,8 L52,18 L52,34 Q52,50 32,58 Q12,50 12,34 L12,18 Z" fill="none" stroke="#78909c" stroke-width="2"/>
-    <polyline points="24,34 30,42 44,24" fill="none" stroke="#78909c" stroke-width="2.5" stroke-linecap="round"/>
-    <text x="32" y="72" text-anchor="middle" font-family="monospace" font-size="9" fill="#78909c" font-weight="bold">shield</text>
-    <text x="32" y="81" text-anchor="middle" font-family="monospace" font-size="6" fill="#78909c" opacity="0.5">protection</text>
-  </g>
-
-  <!-- RIGHT COLUMN: Amp's future crew (placeholder space) -->
-  <line x1="540" y1="290" x2="840" y2="290" stroke="#555d6e" stroke-width="1" stroke-dasharray="3 6" opacity="0.2"/>
-  <text x="690" y="330" text-anchor="middle" font-family="monospace" font-size="8" fill="#555d6e" opacity="0.3">. . .</text>
+  <!-- Footer -->
+  <text x="450" y="510" text-anchor="middle" font-family="monospace" font-size="9" fill="#30363d" letter-spacing="2">the halo-ai family &middot; designed and built by the architect</text>
 </svg>
