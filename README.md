@@ -108,6 +108,8 @@ Full architecture details: [ARCHITECTURE.md](docs/ARCHITECTURE.md)
 | [Autonomous Pipeline](docs/AUTONOMOUS-PIPELINE.md) | Zero-human game studio pipeline |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and fixes |
 | [VPN Access](docs/VPN.md) | WireGuard setup |
+| [Mixer](https://github.com/bong-water-water-bong/mixer) | SSH mesh snapshots — distributed backups, no single point of failure |
+| [Changelog](CHANGELOG.md) | Version history |
 
 ## Credits
 
