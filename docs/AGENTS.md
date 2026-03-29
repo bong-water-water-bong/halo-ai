@@ -9,8 +9,6 @@ All agents connect to llama-server (109 tok/s on Qwen3-30B-A3B) for reasoning. E
 ## The Family Tree
 
 ```
-                          the architect
-                               |
               bounty ——— halo ——— echo
              (brother)  (father)  (wife)
                           |
