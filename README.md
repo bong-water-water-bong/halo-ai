@@ -71,73 +71,24 @@ Full benchmarks with thermals, memory, and backend comparisons: [BENCHMARKS.md](
 ## Infrastructure
 
 ```
-                        ┌──────────────────────────────────────────────────────┐
-                        │                   THE MESH                           │
-                        │                                                      │
-   ┌─────────────┐      │   ┌─────────────┐     ┌─────────────┐               │
-   │  minisforum  │◄─ssh─┤   │   ryzen      │◄─ssh─│ strix-halo  │               │
-   │  windows 11  │──────┤   │   9800X3D    │──────│ AI MAX+ 395 │               │
-   │  office/test │      │   │   desktop    │     │ 128GB / GPU │               │
-   └─────────────┘      │   └─────────────┘     └──────┬──────┘               │
-         ▲               │          ▲                     │                      │
-         │               │          │                     │                      │
-         └───mixer───────┤──────────┘    ┌────────────────┘                      │
-              snapshots   │               │                                       │
-                        │   ┌──────────┐  │   ┌─────────────┐                    │
-                        │   │  sligar   │◄─┘   │  SSH-only    │                    │
-                        │   │ 8700K/1080│      │  nftables    │                    │
-                        │   │ voice/GPU │      │  deny-by-def │                    │
-                        │   └──────────┘      └─────────────┘                    │
-                        └──────────────────────────────────────────────────────┘
+  4 machines ── SSH mesh ── mixer snapshots ── zero cloud
 
-                        ┌──────────────────────────────────────────────────────┐
-                        │              STRIX HALO — AI STACK                    │
-                        │                                                      │
-    Browser ──────────► │  Caddy :80/:443  ──►  Lemonade :8080 (unified API)   │
-                        │       │                    │                          │
-                        │       ├── /chat/     ──►  Open WebUI :3000           │
-                        │       ├── /research/ ──►  Vane :3001                 │
-                        │       ├── /comfyui/  ──►  ComfyUI :8188              │
-                        │       ├── /workflows/──►  n8n :5678                  │
-                        │       ├── /cave/     ──►  Man Cave :3005             │
-                        │       └── /dashboard/──►  Dashboard :3003            │
-                        │                                                      │
-                        │  ┌─ GPU Inference (gfx1151, 115GB) ──────────────┐   │
-                        │  │  llama.cpp :8081   — LLM (109 tok/s)          │   │
-                        │  │  whisper.cpp :8082 — speech-to-text            │   │
-                        │  │  Kokoro :8083      — text-to-speech (54 voices)│   │
-                        │  │  ComfyUI :8188     — image generation          │   │
-                        │  └───────────────────────────────────────────────┘   │
-                        │                                                      │
-                        │  ┌─ Data Layer ──────────────────────────────────┐   │
-                        │  │  Qdrant :6333      — vector DB (RAG)          │   │
-                        │  │  SearXNG :8888     — private meta-search      │   │
-                        │  └───────────────────────────────────────────────┘   │
-                        │                                                      │
-                        │  ┌─ Agents (11 on AMD Gaia) ────────────────────┐   │
-                        │  │  Gaia API :8090    — agent framework          │   │
-                        │  │  Message Bus :8100 — agent IPC                │   │
-                        │  │  Automation :5679  — n8n bridge               │   │
-                        │  │                                               │   │
-                        │  │  halo ─ echo ─ bounty ─ meek ─ amp            │   │
-                        │  │  sentinel ─ forge ─ dealer ─ mechanic         │   │
-                        │  │  + 9 Reflex agents (shadow, vault, fang...)   │   │
-                        │  └───────────────────────────────────────────────┘   │
-                        │                                                      │
-                        │  ┌─ Automation Pipeline ────────────────────────┐   │
-                        │  │  GitHub Release → n8n → Echo LLM → Reddit    │   │
-                        │  │  GitHub Issue → n8n → Bounty triage           │   │
-                        │  │  mixer daemon → Shadow → mesh snapshots       │   │
-                        │  └───────────────────────────────────────────────┘   │
-                        │                                                      │
-                        │  ┌─ Stack Protection ───────────────────────────┐   │
-                        │  │  halo-freeze.sh    — snapshot entire stack    │   │
-                        │  │  halo-thaw.sh      — instant rollback         │   │
-                        │  │  mixer             — cross-machine snapshots   │   │
-                        │  │  Man Cave UI       — one-click freeze/compile │   │
-                        │  └───────────────────────────────────────────────┘   │
-                        └──────────────────────────────────────────────────────┘
+  ryzen ←──→ strix-halo ←──→ minisforum ←──→ sligar
+  desktop      128GB GPU       windows 11      1080Ti
+
+  Browser → Caddy → Lemonade (unified API)
+                  ├─ llama.cpp    LLM inference
+                  ├─ whisper.cpp  speech-to-text
+                  ├─ Kokoro       text-to-speech
+                  ├─ ComfyUI      image generation
+                  ├─ Open WebUI   chat + RAG
+                  ├─ Vane         deep research
+                  ├─ n8n          workflow automation
+                  ├─ Gaia         11 agents, 78 tools
+                  └─ Man Cave     control center
 ```
+
+Full architecture details: [ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## Docs
 
