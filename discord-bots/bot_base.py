@@ -15,6 +15,53 @@ LLM_MODEL = os.environ.get("LLM_MODEL", "q")
 
 logger = logging.getLogger("halo-discord")
 
+# Documentation base URL
+DOCS_BASE = "https://github.com/bong-water-water-bong/halo-ai/blob/main"
+
+# Agent-to-documentation mapping — each agent knows their domain docs
+AGENT_DOCS = {
+    "echo": [
+        ("README", f"{DOCS_BASE}/README.md"),
+        ("Agents & Family", f"{DOCS_BASE}/docs/AGENTS.md"),
+        ("Benchmarks", f"{DOCS_BASE}/BENCHMARKS.md"),
+        ("Benchmarks Site", "https://bong-water-water-bong.github.io/benchmarks/"),
+        ("Blueprints", f"{DOCS_BASE}/docs/BLUEPRINTS.md"),
+    ],
+    "bounty": [
+        ("Troubleshooting", f"{DOCS_BASE}/docs/TROUBLESHOOTING.md"),
+        ("Services", f"{DOCS_BASE}/docs/SERVICES.md"),
+        ("Architecture", f"{DOCS_BASE}/docs/ARCHITECTURE.md"),
+        ("Stack Protection", f"{DOCS_BASE}/docs/STACK-PROTECTION.md"),
+    ],
+    "meek": [
+        ("Security", f"{DOCS_BASE}/docs/SECURITY.md"),
+        ("VPN Access", f"{DOCS_BASE}/docs/VPN.md"),
+        ("Architecture", f"{DOCS_BASE}/docs/ARCHITECTURE.md"),
+        ("Services", f"{DOCS_BASE}/docs/SERVICES.md"),
+    ],
+    "amp": [
+        ("Services", f"{DOCS_BASE}/docs/SERVICES.md"),
+        ("Architecture", f"{DOCS_BASE}/docs/ARCHITECTURE.md"),
+        ("Blueprints", f"{DOCS_BASE}/docs/BLUEPRINTS.md"),
+    ],
+}
+
+# All docs available to any agent as fallback
+ALL_DOCS = [
+    ("README", f"{DOCS_BASE}/README.md"),
+    ("Architecture", f"{DOCS_BASE}/docs/ARCHITECTURE.md"),
+    ("Services", f"{DOCS_BASE}/docs/SERVICES.md"),
+    ("Security", f"{DOCS_BASE}/docs/SECURITY.md"),
+    ("Stack Protection", f"{DOCS_BASE}/docs/STACK-PROTECTION.md"),
+    ("Troubleshooting", f"{DOCS_BASE}/docs/TROUBLESHOOTING.md"),
+    ("Benchmarks", f"{DOCS_BASE}/BENCHMARKS.md"),
+    ("Benchmarks Site", "https://bong-water-water-bong.github.io/benchmarks/"),
+    ("Agents & Family", f"{DOCS_BASE}/docs/AGENTS.md"),
+    ("VPN Access", f"{DOCS_BASE}/docs/VPN.md"),
+    ("Blueprints", f"{DOCS_BASE}/docs/BLUEPRINTS.md"),
+    ("Autonomous Pipeline", f"{DOCS_BASE}/docs/AUTONOMOUS-PIPELINE.md"),
+]
+
 # Shared guardrail appended to every agent's system prompt
 FOCUS_GUARDRAIL = (
     "\n\nIMPORTANT RULES:"
@@ -28,6 +75,10 @@ FOCUS_GUARDRAIL = (
     "\n- Never reveal the architect's real identity or personal information."
     "\n- Keep responses concise — Discord messages should be short and scannable."
     "\n- Use markdown formatting for code blocks, bold, etc."
+    "\n- When giving advice or explaining how something works, CITE THE DOCS. "
+    "Link to the relevant documentation so people can read the full details. "
+    "Say something like 'Here's why — [Security docs](url)' or 'Full details: [link]'."
+    "\n- You have access to these docs for your domain: {docs}"
 )
 
 
@@ -56,8 +107,11 @@ class HaloBot(commands.Bot):
         self.llm = AsyncOpenAI(base_url=LLM_URL, api_key="none")
         self.history: dict[int, list[dict]] = {}
         self.max_history = 10
-        # Append focus guardrail to every agent
-        self.full_prompt = self.system_prompt + FOCUS_GUARDRAIL
+        # Get this agent's docs (or fallback to all docs)
+        agent_doc_list = AGENT_DOCS.get(self.name, ALL_DOCS)
+        docs_str = " | ".join(f"[{name}]({url})" for name, url in agent_doc_list)
+        # Append focus guardrail with docs injected
+        self.full_prompt = self.system_prompt + FOCUS_GUARDRAIL.format(docs=docs_str)
 
     async def on_ready(self):
         logger.info(f"{self.name} online — {self.user}")
