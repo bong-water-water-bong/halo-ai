@@ -447,3 +447,43 @@ ss -tlnp | grep -v 127.0.0.1
 ```
 
 This should show only Caddy (on `0.0.0.0:443` / `0.0.0.0:8443`) and sshd (on `0.0.0.0:22`). If any other service appears, check its systemd unit and ensure the bind address is `127.0.0.1`.
+
+## SSH Mixer — Distributed Mesh Snapshots
+
+The [mixer](https://github.com/bong-water-water-bong/mixer) is Shadow's distributed backup system. It ensures no single machine is a single point of failure.
+
+### How it works
+
+Every machine in the mesh takes btrfs snapshots of itself and sends them to the next machine in a ring over SSH. If any machine dies, its snapshot lives on another machine.
+
+```
+ryzen → strix-halo → minisforum → ryzen
+```
+
+Each machine holds its own local snapshots plus one snapshot from the previous machine in the ring. All transfers happen over SSH — key-based, encrypted, no extra ports.
+
+### Security model
+
+- **SSH-only transport** — snapshots move via `btrfs send | ssh btrfs receive`. No new ports opened, no new protocols. Same SSH keys used for everything else.
+- **Read-only snapshots** — btrfs snapshots are created read-only. A compromised machine can't modify the snapshot it received.
+- **Ring topology** — no machine holds its own backup on itself. If ransomware hits one machine, the backup is on a machine it can't reach.
+- **No NAS** — no central storage server that becomes a single point of failure or a single target.
+- **Shadow monitors integrity** — file hashes are tracked. If a snapshot is tampered with, Shadow flags it.
+
+### Commands
+
+```bash
+mixer status        # show all machines, snapshot counts, health
+mixer run           # snapshot all + distribute around the ring
+mixer daemon        # run automatically every 6 hours
+mixer restore <from> # pull a snapshot from another machine
+```
+
+### Disaster recovery
+
+Machine dies completely:
+1. Boot a fresh install
+2. `mixer restore <neighbor>` — pulls the latest snapshot from the next machine in the ring
+3. Stack is back
+
+The ring means the data is always somewhere else. Shadow moves it in silence.
