@@ -44,17 +44,15 @@ The dashboard is built and served via Docker. See the `Dockerfile` and `nginx.co
 
 ## Structure
 
-```
-dashboard/
-├── src/
-│   ├── components/     # Sidebar, SetupWizard, PreFlightChecks, etc.
-│   ├── pages/          # Dashboard, Models, Voice, Workflows, Settings
-│   ├── hooks/          # useSystemStatus, useModels, useVoiceAgent, etc.
-│   ├── App.jsx         # Router and layout
-│   └── main.jsx        # Entry point
-├── public/             # Static assets
-├── Dockerfile          # Multi-stage build (npm build + nginx)
-├── nginx.conf          # Production proxy config
-├── vite.config.js      # Build configuration
-└── tailwind.config.js  # Tailwind theme
-```
+| Path | Purpose |
+|------|---------|
+| src/components/ | Sidebar, SetupWizard, PreFlightChecks, etc. |
+| src/pages/ | Dashboard, Models, Voice, Workflows, Settings |
+| src/hooks/ | useSystemStatus, useModels, useVoiceAgent, etc. |
+| src/App.jsx | Router and layout |
+| src/main.jsx | Entry point |
+| public/ | Static assets |
+| Dockerfile | Multi-stage build (npm build + nginx) |
+| nginx.conf | Production proxy config |
+| vite.config.js | Build configuration |
+| tailwind.config.js | Tailwind theme |

@@ -136,22 +136,19 @@ When `DASHBOARD_API_KEY` is empty (default), all endpoints are accessible withou
 
 ## Architecture
 
-```
-Dashboard UI (:3001)
-       │
-       ▼
-Dashboard API (:3002)
-  ├── gpu.py ──────────────── nvidia-smi / sysfs AMD
-  ├── helpers.py ──────────── Docker-network health checks
-  ├── agent_monitor.py ─────── Background metrics collection
-  └── routers/
-       ├── workflows.py ────── n8n API integration
-       ├── features.py ─────── Hardware-aware feature discovery
-       ├── setup.py ─────────── Setup wizard + persona system
-       ├── updates.py ──────── GitHub releases + dream-update.sh
-       ├── agents.py ───────── Agent session + throughput metrics
-       └── privacy.py ──────── Privacy Shield container control
-```
+Dashboard UI (:3001) > Dashboard API (:3002)
+
+| File | Purpose |
+|------|---------|
+| gpu.py | nvidia-smi / sysfs AMD |
+| helpers.py | Docker-network health checks |
+| agent_monitor.py | Background metrics collection |
+| routers/workflows.py | n8n API integration |
+| routers/features.py | Hardware-aware feature discovery |
+| routers/setup.py | Setup wizard + persona system |
+| routers/updates.py | GitHub releases + dream-update.sh |
+| routers/agents.py | Agent session + throughput metrics |
+| routers/privacy.py | Privacy Shield container control |
 
 ## Files
 
