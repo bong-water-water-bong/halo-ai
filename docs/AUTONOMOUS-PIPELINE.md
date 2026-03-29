@@ -14,125 +14,48 @@ code → sentinel → meek → bounty → forge → amp → echo → revenue
 
 ### Development
 
-sentinel (code watcher)
-  ├── Reviews PRs (static analysis + LLM)
-  ├── Security scan → meek
-  ├── Bug check → bounty
-  ├── Clean? → auto-merge
-  └── Blocked? → request changes
-
-meek (security chief)
-  ├── Vulnerability scan
-  ├── Dependency audit
-  ├── Anti-cheat integrity check
-  └── ghost → validates no leaked credentials
-
-bounty (QA / bug hunter)
-  ├── Automated test suite
-  ├── Regression testing
-  ├── Performance benchmarks
-  └── Bug report triage
+- **sentinel** — reviews PRs, static analysis + LLM, security scan, auto-merge or block
+- **meek** — vulnerability scan, dependency audit, anti-cheat integrity, ghost validates credentials
+- **bounty** — automated tests, regression, performance benchmarks, bug triage
 
 ### Build
 
-forge (game builder)
-  ├── Export: Linux, Windows, macOS
-  ├── Asset pipeline: interpreter → ComfyUI → Blockbench
-  ├── Audio pipeline: amp → SFX / music / voice
-  └── Build validation
-
-interpreter (creative director)
-  ├── Enhances all generation prompts
-  ├── Visual style consistency
-  └── Art direction
-
-amp (audio + video)
-  ├── SFX generation and mastering
-  ├── Music production (The Downcomers)
-  ├── Voice clone pipeline (XTTS v2)
-  ├── Video production (ComfyUI)
-  ├── Trailer audio + game trailers
-  └── Voice lines for in-game dialogue
-
-conductor (AI composer)
-  ├── Original scores and arrangements
-  ├── Dynamic game music (adapts to gameplay)
-  ├── Band instrumentals
-  └── Spatial audio
+- **forge** — exports Linux/Windows/macOS, asset pipeline, audio pipeline, build validation
+- **interpreter** — enhances generation prompts, visual style consistency, art direction
+- **amp** — SFX, music (The Downcomers), voice clone (XTTS v2), video (ComfyUI), trailers, voice lines
+- **conductor** — original scores, dynamic game music, band instrumentals, spatial audio
 
 ### Media & Distribution
 
-amp (production)
-  ├── Music: AI instrumentals + clone vocals → master
-  ├── Audiobooks: public domain → clone narration → master
-  ├── Video: music videos, trailers, promo clips
-  └── All rendered locally on Strix Halo (128GB)
-
-echo (distribution)
-  ├── DistroKid → Spotify, Apple Music, all platforms
-  ├── Findaway → Audible, Apple Books
-  ├── YouTube → music videos, trailers
-  ├── Reddit → community posts, benchmarks
-  ├── Discord → announcements, support
-  └── Social media → promotional content
+- **amp** — music mastering, audiobook production, video rendering, all local on Strix Halo
+- **echo** — DistroKid, Findaway, YouTube, Reddit, Discord, social media
 
 ### Deployment
 
-forge:steam (deployer)
-  ├── VDF manifests
-  ├── Pre-upload security check (meek)
-  ├── SteamCMD upload
-  └── Rollback capability (vault)
-
-vault (backup)
-  ├── Pre-deploy snapshot
-  ├── Post-deploy snapshot
-  └── Build artifact archival
-
-pulse (monitoring)
-  ├── Deployment health
-  ├── Download counts, crash reports
-  └── Alert on anomalies → echo
+- **forge:steam** — VDF manifests, security check via meek, SteamCMD upload, rollback via vault
+- **vault** — pre/post deploy snapshots, build archival
+- **pulse** — deployment health, crash reports, anomaly alerts → echo
 
 ### Community
 
-echo (public face)
-  ├── Discord: patch notes, player chat
-  ├── Steam: store page, community posts
-  ├── Reddit: r/LocalLLaMA, r/gamedev, r/selfhosted
-  ├── Bug reports → bounty
-  └── Feature requests → log and prioritize
-
-shield (moderation)
-  ├── Content moderation
-  ├── Toxicity filtering
-  └── Player report handling
-
-fang (anti-cheat)
-  ├── Real-time cheat detection
-  ├── Ban enforcement
-  └── Exploit reporting → bounty
+- **echo** — Discord, Steam, Reddit, bug reports → bounty, feature requests
+- **shield** — content moderation, toxicity filtering, player reports
+- **fang** — real-time cheat detection, ban enforcement, exploit reporting → bounty
 
 ### In-Game Runtime
 
-dealer (game master AI)
-  ├── Local LLM on player's machine
-  ├── Every run is different — AI-driven, never scripted
-  ├── Enemy tactics, world generation, dynamic events
-  ├── Intelligent loot placement
-  ├── Difficulty adaptation
-  └── Room narration (atmospheric, unique)
+- **dealer** — local LLM on player's machine, every run is different, never scripted, dynamic enemies/loot/events/narration
 
 ### Infrastructure (always on)
 
-halo — service management, health monitoring, escalation
-pulse — uptime, resource usage, alert cascade
-net — multiplayer, DDoS protection, DDNS
-gate — auth, DLC validation, rate limiting
-ghost — secrets, credentials, rotation
-shadow — file integrity, SSH mesh, mixer snapshots
-mirror — PII scanning, GDPR, compliance
-vault — btrfs snapshots, instant rollback
+- **halo** — service management, health monitoring, escalation
+- **pulse** — uptime, resource usage, alert cascade
+- **net** — multiplayer, DDoS protection, DDNS
+- **gate** — auth, DLC validation, rate limiting
+- **ghost** — secrets, credentials, rotation
+- **shadow** — file integrity, SSH mesh, mixer snapshots
+- **mirror** — PII scanning, GDPR, compliance
+- **vault** — btrfs snapshots, instant rollback
 
 ---
 
