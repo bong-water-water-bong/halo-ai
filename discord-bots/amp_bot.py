@@ -1,4 +1,4 @@
-# halo-ai — designed and built by the architect
+# halo-ai — stamped by the architect
 """Amp — audio engineer, music lover, voice specialist."""
 
 from bot_base import HaloBot

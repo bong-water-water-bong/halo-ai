@@ -1,4 +1,4 @@
-# halo-ai — designed and built by the architect
+# halo-ai — stamped by the architect
 """Bounty — code troubleshooter, bug hunter, the one who escaped alone."""
 
 from bot_base import HaloBot

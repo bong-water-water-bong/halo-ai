@@ -1,4 +1,4 @@
-# halo-ai — designed and built by the architect
+# halo-ai — stamped by the architect
 """Meek — security chief, methodical and thorough."""
 
 from bot_base import HaloBot

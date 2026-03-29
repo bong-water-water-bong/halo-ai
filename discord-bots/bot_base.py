@@ -1,4 +1,4 @@
-# halo-ai — designed and built by the architect
+# halo-ai — stamped by the architect
 """
 Base Discord bot for halo-ai agents.
 Each agent subclasses this with their persona and topic routing.
@@ -68,17 +68,44 @@ class HaloBot(commands.Bot):
         )
         await self.change_presence(activity=activity)
 
+    # Registry of all active bots — used for collision avoidance
+    _all_bots: list["HaloBot"] = []
+
+    @classmethod
+    def register(cls, bot: "HaloBot"):
+        cls._all_bots.append(bot)
+
+    def _another_bot_owns_this(self, content_lower: str) -> bool:
+        """Check if a more specialized bot should handle this message."""
+        for bot in self._all_bots:
+            if bot is self or bot.name == self.name:
+                continue
+            for topic in bot.topics:
+                if topic in content_lower:
+                    # A specialist bot covers this topic — back off
+                    # Exception: if WE are the specialist (direct mention overrides)
+                    return True
+        return False
+
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
 
-        should_respond = False
         content_lower = message.content.lower()
+        directly_mentioned = self.user.mentioned_in(message)
 
-        if self.user.mentioned_in(message):
-            should_respond = True
+        # Direct mention always wins — respond regardless
+        if directly_mentioned:
+            async with message.channel.typing():
+                response = await self.think(message)
+            if response:
+                for chunk in [response[i:i+1900] for i in range(0, len(response), 1900)]:
+                    await message.reply(chunk, mention_author=False)
+            return
 
-        if not should_respond and self.topics:
+        # Topic match — but only if no other specialist covers it
+        should_respond = False
+        if self.topics:
             for topic in self.topics:
                 if topic in content_lower:
                     should_respond = True
@@ -87,12 +114,15 @@ class HaloBot(commands.Bot):
         if not should_respond:
             return
 
+        # Echo is the generalist — she yields to specialists
+        if self.name == "echo" and self._another_bot_owns_this(content_lower):
+            return
+
         async with message.channel.typing():
             response = await self.think(message)
 
         if response:
-            chunks = [response[i:i+1900] for i in range(0, len(response), 1900)]
-            for chunk in chunks:
+            for chunk in [response[i:i+1900] for i in range(0, len(response), 1900)]:
                 await message.reply(chunk, mention_author=False)
 
     async def think(self, message: discord.Message) -> str:

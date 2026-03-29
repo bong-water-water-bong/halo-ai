@@ -1,4 +1,4 @@
-# halo-ai — designed and built by the architect
+# halo-ai — stamped by the architect
 """Launch all Discord bots in parallel."""
 
 import asyncio
@@ -38,7 +38,13 @@ async def main():
         print("See .env.example for required variables.")
         sys.exit(1)
 
+    # Register all bots so they know about each other (collision avoidance)
+    from bot_base import HaloBot
+    for name, bot in bots:
+        HaloBot.register(bot)
+
     print(f"Launching {len(bots)} agents: {', '.join(n for n, _ in bots)}")
+    print("Collision avoidance: Echo yields to specialists on their topics")
 
     tasks = []
     for name, bot in bots:

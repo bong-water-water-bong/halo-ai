@@ -1,4 +1,4 @@
-# halo-ai — designed and built by the architect
+# halo-ai — stamped by the architect
 """Echo — social media manager, community face of the halo-ai family."""
 
 from bot_base import HaloBot
