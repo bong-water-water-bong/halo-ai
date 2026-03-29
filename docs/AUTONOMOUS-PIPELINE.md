@@ -190,7 +190,7 @@ Message format:
   - Runs: all agents, llama.cpp (for sentinel/echo/dealer LLM review),
     ComfyUI (asset gen), message bus, monitoring
   - Accessible at: http://strixhalo (Caddy on port 80)
-  - SSH: 192.168.50.69
+  - SSH: xxx.xxx.xxx.xxx
 
 - ryzen (dev machine): 9800X3D, Navi 48
   - Runs: Godot editor, development, testing, glass dock

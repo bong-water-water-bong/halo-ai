@@ -78,7 +78,7 @@ class RedditBridge:
             ),
         )
         self.llm = AsyncOpenAI(
-            base_url=os.environ.get("LLM_BASE_URL", "http://192.168.50.69:8081/v1"),
+            base_url=os.environ.get("LLM_BASE_URL", "http://localhost:8081/v1"),
             api_key="none",
         )
         self.model = os.environ.get("LLM_MODEL", "q")

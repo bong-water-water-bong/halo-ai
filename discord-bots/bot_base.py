@@ -10,7 +10,7 @@ from openai import AsyncOpenAI
 import discord
 from discord.ext import commands
 
-LLM_URL = os.environ.get("LLM_BASE_URL", "http://192.168.50.69:8081/v1")
+LLM_URL = os.environ.get("LLM_BASE_URL", "http://localhost:8081/v1")
 LLM_MODEL = os.environ.get("LLM_MODEL", "q")
 
 logger = logging.getLogger("halo-discord")

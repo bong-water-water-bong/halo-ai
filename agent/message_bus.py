@@ -3,7 +3,7 @@
 halo-ai Agent Message Bus
 ==========================
 Simple HTTP-based IPC layer for agent-to-agent communication.
-Runs on Strix Halo (192.168.50.69:8100).
+Runs on Strix Halo (xxx.xxx.xxx.xxx:8100).
 
 Usage:
     # Start the bus
@@ -258,7 +258,7 @@ class MessageBusClient:
         msgs = client.get_messages()
     """
 
-    def __init__(self, agent_name: str, bus_url: str = "http://192.168.50.69:8100"):
+    def __init__(self, agent_name: str, bus_url: str = "http://xxx.xxx.xxx.xxx:8100"):
         self.agent = agent_name
         self.bus_url = bus_url.rstrip("/")
 
