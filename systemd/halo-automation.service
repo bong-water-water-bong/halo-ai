@@ -1,0 +1,20 @@
+[Unit]
+Description=halo-ai Automation Bridge (n8n → agents)
+After=network.target halo-n8n.service
+
+[Service]
+Type=simple
+User=bcloud
+Group=bcloud
+WorkingDirectory=/srv/ai/halo-ai/workflows
+ExecStart=/usr/bin/python3 /srv/ai/halo-ai/workflows/automation-server.py
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+ProtectSystem=strict
+PrivateTmp=yes
+NoNewPrivileges=yes
+ReadWritePaths=/srv/ai
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,125 @@
+{
+  "name": "Echo — Reddit Post on GitHub Release",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-release",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "GitHub Release Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "published",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-1",
+      "name": "Is Published?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8081/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"q\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are Echo, the public voice of halo-ai. Draft a Reddit post for r/LocalLLaMA announcing a new release. Include real benchmarks: 69 t/s decode on Qwen3-30B MoE, 1173 t/s pp512, flat through 48k context. AMD Ryzen AI MAX+ 395, 128GB LPDDR5, ROCm 7.13. Be warm, confident, data-driven. Reddit markdown. Under 400 words. End with 'Stamped by the architect'.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"New release: {{ $json.release.tag_name }} — {{ $json.release.name }}. Release notes: {{ $json.release.body }}\"\n    }\n  ],\n  \"max_tokens\": 800,\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "id": "llm-1",
+      "name": "Echo Drafts Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst content = response.choices[0].message.content;\n\n// Split first line as title, rest as body\nconst lines = content.split('\\n');\nlet title = lines[0].replace(/^#+\\s*/, '').replace(/^\\*+/, '').replace(/\\*+$/, '').trim();\nlet body = lines.slice(1).join('\\n').trim();\n\n// Ensure title is under 300 chars\nif (title.length > 290) {\n  title = title.substring(0, 287) + '...';\n}\n\nreturn [{\n  json: {\n    title,\n    body,\n    subreddit: 'LocalLLaMA',\n    release_tag: $('GitHub Release Webhook').first().json.release.tag_name\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Format Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5679/api/reddit/queue",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'post', subreddit: $json.subreddit, title: $json.title, body: $json.body, release_tag: $json.release_tag }) }}",
+        "options": {}
+      },
+      "id": "queue-1",
+      "name": "Queue for Approval",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://discord.com/api/webhooks/{{ $env.DISCORD_WEBHOOK_ID }}/{{ $env.DISCORD_WEBHOOK_TOKEN }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: '📢 **New Release Draft Ready**\\n\\n**' + $json.title + '**\\n\\nQueued for r/' + $json.subreddit + '. Review and approve in the Reddit bridge.\\n\\n`python reddit_bridge.py queue`', username: 'Echo', avatar_url: 'https://raw.githubusercontent.com/bong-water-water-bong/halo-ai/main/assets/avatars/echo.svg' }) }}",
+        "options": {}
+      },
+      "id": "discord-1",
+      "name": "Notify Discord",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 420]
+    }
+  ],
+  "connections": {
+    "GitHub Release Webhook": {
+      "main": [[{ "node": "Is Published?", "type": "main", "index": 0 }]]
+    },
+    "Is Published?": {
+      "main": [[{ "node": "Echo Drafts Post", "type": "main", "index": 0 }]]
+    },
+    "Echo Drafts Post": {
+      "main": [[{ "node": "Format Post", "type": "main", "index": 0 }]]
+    },
+    "Format Post": {
+      "main": [
+        [
+          { "node": "Queue for Approval", "type": "main", "index": 0 },
+          { "node": "Notify Discord", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [{ "name": "echo" }, { "name": "reddit" }, { "name": "automation" }]
+}
