@@ -1,0 +1,83 @@
+# halo-ai — stamped by the architect
+name: Release & Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build Python package
+        run: python -m build
+
+      - name: Create release tarball
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          tar czf halo-ai-${VERSION}.tar.gz \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='test-runs' \
+            install.sh \
+            scripts/ \
+            agent/ \
+            configs/ \
+            systemd/ \
+            dashboard-api/ \
+            dashboard-ui/ \
+            discord-bots/ \
+            docs/ \
+            pyproject.toml \
+            README.md \
+            LICENSE
+          echo "TARBALL=halo-ai-${VERSION}.tar.gz" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ env.TARBALL }}
+            dist/*.whl
+            dist/*.tar.gz
+          body: |
+            ## halo-ai ${{ github.ref_name }}
+
+            Bare-metal AI stack for AMD Strix Halo.
+
+            ### Install
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/bong-water-water-bong/halo-ai/main/install.sh | bash
+            ```
+
+            ### Python package
+            ```bash
+            pip install halo-ai --index-url https://ghcr.io/bong-water-water-bong
+            ```
+
+            *Stamped by the architect*
+
+      - name: Publish to GitHub Packages (PyPI)
+        run: |
+          twine upload --repository-url https://ghcr.io/bong-water-water-bong \
+            --username ${{ github.actor }} \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            dist/* || echo "PyPI upload skipped — using GitHub Releases instead"

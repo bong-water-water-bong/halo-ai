@@ -1,0 +1,45 @@
+# halo-ai — stamped by the architect
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "halo-ai"
+version = "1.0.0"
+description = "Bare-metal AI stack for AMD Strix Halo — 13 services, 11 agents, 78 tools"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [
+    {name = "the architect"},
+]
+keywords = ["ai", "llm", "amd", "strix-halo", "rocm", "agents", "bare-metal"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.34.0",
+    "openai>=1.0.0",
+    "discord.py>=2.3.0",
+    "python-dotenv>=1.0.0",
+    "praw>=7.7.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/bong-water-water-bong/halo-ai"
+Repository = "https://github.com/bong-water-water-bong/halo-ai"
+Documentation = "https://github.com/bong-water-water-bong/halo-ai/tree/main/docs"
+
+[project.scripts]
+halo = "scripts.halo:main"
+
+[tool.setuptools.packages.find]
+include = ["agent*", "dashboard_api*", "discord_bots*", "scripts*"]

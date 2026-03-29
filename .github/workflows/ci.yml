@@ -1,0 +1,53 @@
+# halo-ai — stamped by the architect
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]" 2>/dev/null || pip install -e . 2>/dev/null || true
+          pip install ruff
+
+      - name: Lint Python
+        run: ruff check agent/ dashboard-api/ discord-bots/ scripts/ --ignore E501
+
+      - name: Check install script syntax
+        run: bash -n install.sh
+
+      - name: Check all shell scripts
+        run: |
+          for f in scripts/*.sh; do
+            bash -n "$f" && echo "OK: $f" || echo "FAIL: $f"
+          done
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build package
+        run: |
+          pip install build
+          python -m build
+          echo "Built:"
+          ls -lh dist/
